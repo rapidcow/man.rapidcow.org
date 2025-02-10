@@ -1,0 +1,8 @@
+the manual page project
+
+a basic requirement: i want to see the man page
+for List::BisectSearch(3pm) at:
+
+    https://man.rapidcow.org/man/3/List::BisectSearch (for HTML)
+    https://man.rapidcow.org/man/3/List::BisectSearch.3   (for nroff)
+    https://man.rapidcow.org/man/3/List::BisectSearch.3pm (ditto)
