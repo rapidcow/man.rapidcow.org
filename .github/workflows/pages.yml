@@ -61,7 +61,6 @@ jobs:
           echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
           echo "$prefix/bin" >> "$GITHUB_PATH"
 
-      # docs/ holds the javadoc, CNAME, etc.; the build fills in the rest.
       - name: Build
         run: |
           ./configure -Db=docs
