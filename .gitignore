@@ -1,0 +1,8 @@
+.DS_Store
+._*
+.*.sw[a-p]
+*.orig
+*.rej
+*.new
+*.old
+.cache/
