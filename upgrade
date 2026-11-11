@@ -1,88 +1,46 @@
 #!/bin/sh
-#
-# upgrade -- regenerate what `siteconf -i' makes (./configure and
-# ./render), then put our local changes (X.patch) back on top.
-#
-#   ./upgrade      after upgrading siteconf, or after changing
-#                  the options below
-#   ./upgrade -s   after editing ./configure or ./render by hand:
-#                  save the difference between each and a pristine
-#                  one as the new X.patch
-#
-# siteconf writes these under their own names (render says what it
-# is called in its header), so it is let loose on the real files:
-# each X is first moved to X.old, and what siteconf writes is kept as
-# X.new, the pristine one the patch is made against.  If a patch does
-# not apply, X.old goes back to being X, so there is no harm done;
-# patch(1) says where, and leaves X.rej.  Fix X up by hand, then run
-# this with -s.  (patch is not let fuzz, either: a hunk that lands
-# somewhere else is worse than one that does not land at all.)
-#
-# They are generated deterministically, so the same options give the
-# same text, and the patches keep applying.
-#
 set -e
-
-# What siteconf -i makes (and so what has a patch)
-files="configure render"
-
-# What `siteconf -i' is told.  The same options are recorded in the
-# header of ./configure.
-siteconf_opts() {
-	"${SITECONF:-siteconf}" -i -f -q \
-		-P web -Sa=. -Sb=docs -Sc=.cache '-Dclean=clean-&' \
-		-Osite_url=https://man.rapidcow.org \
-		-MRdKw::WwW::GenGenLib::Template::Provider \
-		"$@"
-}
-
-case "$1" in
--s|'') ;;
-*)
-	echo "usage: $0 [-s]" >&2
-	exit 2
-	;;
-esac
-
-cd -- "$(dirname -- "$0")"
-
-# Should siteconf (or we) fall over halfway, put back what was there.
-restore() {
-	for f in $files; do
-		[ -f "$f.old" ] && mv -f -- "$f.old" "$f"
-	done
-}
-trap 'restore; exit 1' HUP INT TERM
-
-for f in $files; do
-	mv -f -- "$f" "$f.old"
-done
-siteconf_opts || { restore; exit 1; }
-for f in $files; do
-	cp -p -- "$f" "$f.new"
-done
-
-status=0
-for f in $files; do
-	case "$1" in
-	-s)
-		mv -f -- "$f.old" "$f"
-		# diff(1) exits 1 when the files differ, which is the point.
-		diff -u --label "a/$f" --label "b/$f" "$f.new" "$f" \
-			> "$f.patch.tmp" || [ $? -eq 1 ]
-		mv -f -- "$f.patch.tmp" "$f.patch"
-		echo "Saved $f.patch" >&2
+save=0
+while getopts s o
+do
+	case $o in
+	s)
+		save=1
 		;;
-	'')
-		if [ -s "$f.patch" ] && ! patch -s -F 0 "$f" < "$f.patch"; then
-			mv -f -- "$f.old" "$f"
-			echo "E: $f.patch does not apply; kept $f as it was" >&2
-			status=1
-			continue
-		fi
-		echo "Upgraded $f" >&2
+	*)
+		exit 1
 		;;
 	esac
 done
-trap - HUP INT TERM
-exit $status
+shift $(( OPTIND - 1 ))
+
+init ()
+{
+	siteconf -i -Sa=. -Sb=docs -Obase_url=/ -Osite_url=https://foss.rapidcow.org -P web \
+		-MRdKw::WwW::GenGenLib::Template::Provider "$@"
+}
+save ()
+{
+	diff -u -L a/render -L b/render render.new render > render.patch
+}
+
+if [ $save -eq 0 ]
+then
+(
+	set -x
+	mv render render.old
+	init -f
+	cp render render.new
+	patch < render.patch
+	diff -q render render.old || save
+)
+else
+(
+	set -x
+	mv render render.old
+	init -f
+	mv render render.new
+	mv render.old render
+	save
+)
+fi
