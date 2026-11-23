@@ -8,9 +8,7 @@
 [% WRAPPER layout.tt -%]
 <article class="listing">
 <h1>man.rapidcow.org</h1>
-<p class="lede">Manual pages of my software, as of its latest releases:
-[% count %] pages for now, all from
-<a href="https://foss.rapidcow.org/project/siteconf/">siteconf</a>.</p>
+<p class="lede">Welcome to <b>man</b>.rapidcow.org :]</p>
 
 <h2>Sections</h2>
 <ul class="sectionlist">
