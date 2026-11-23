@@ -1,0 +1,103 @@
+#!/usr/bin/env perl
+#
+# checklinks -- see that every link in the site goes somewhere
+#
+#   ./checklinks [dir]        (docs by default; after ./finish)
+#
+# Every relative href and src in every HTML file must name a file
+# there, as a web server like GitHub Pages finds it (PATH, PATH.html,
+# or PATH/index.html), and its #fragment an id in that file.  Links
+# with a scheme (https:, mailto:) are not followed.  The names with
+# `..' that ./finish leaves (without -p) are not checked themselves.
+#
+use 5.010;
+use strict;
+use warnings;
+
+use File::Find qw( find );
+
+my $dir = shift // 'docs';
+-d $dir or die "checklinks: $dir: no such directory\n";
+
+my (@html, %ids);
+find({ no_chdir => 1, wanted => sub {
+	return unless -f && /\.html\z/;
+	(my $rel = $File::Find::name) =~ s{\A\Q$dir\E/}{};
+	return if $rel =~ m{(?:\A|/)[^/]*\.\.[^/]*\.html\z};
+	push @html, $rel;
+} }, $dir);
+
+sub slurp { open my $fh, '<:raw', "$dir/$_[0]" or die "checklinks: $_[0]: $!\n"; local $/; <$fh> }
+
+sub ids_of
+{
+	my ($file) = @_;
+	$ids{$file} //= { map { $_ => 1 } slurp($file) =~ /\sid="([^"]+)"/g };
+}
+
+sub unescape
+{
+	my ($s) = @_;
+	$s =~ s/&amp;/&/g; $s =~ s/&quot;/"/g; $s =~ s/&lt;/</g; $s =~ s/&gt;/>/g;
+	$s =~ s/%([0-9A-Fa-f]{2})/chr hex $1/ge;
+	$s;
+}
+
+# resolve a relative path against the directory of $from
+sub resolve
+{
+	my ($from, $path) = @_;
+	my @seg = split m{/}, $from, -1;
+	pop @seg;
+	my $trailing = $path =~ m{(?:\A|/)\.{0,2}\z};
+	for (split m{/}, $path) {
+		next if $_ eq '' || $_ eq '.';
+		if ($_ eq '..') { @seg or return; pop @seg; next }
+		push @seg, $_;
+	}
+	my $p = join '/', @seg;
+	$p .= '/' if $trailing && length $p;
+	$p;
+}
+
+sub find_file
+{
+	my ($p) = @_;
+	return 'index.html' if $p eq '';
+	if ($p =~ m{/\z}) { return -f "$dir/${p}index.html" ? "${p}index.html" : undef }
+	return $p if -f "$dir/$p";
+	return "$p.html" if -f "$dir/$p.html";
+	return "$p/index.html" if -f "$dir/$p/index.html";
+	undef;
+}
+
+my ($n, @bad) = (0);
+for my $file (sort @html) {
+	my $text = slurp($file);
+	for my $url ($text =~ /\s(?:href|src)="([^"]*)"/g) {
+		$url = unescape($url);
+		if (my ($scheme) = $url =~ m{\A([a-zA-Z][a-zA-Z0-9+.-]*):}) {
+			# RdKw::WwW::GenLib.html is of scheme RdKw: (and is a mistake)
+			$scheme =~ /\A(?:https?|mailto|ftp|data)\z/i
+				or push @bad, "$file: $url: scheme $scheme:?";
+			next;
+		}
+		$n++;
+		$url =~ s/\?[^#]*//;
+		my ($path, $frag) = $url =~ /\A([^#]*)(?:#(.*))?\z/s;
+		my $to = $file;
+		if (length $path) {
+			if ($path =~ m{\A/}) { push @bad, "$file: $url: absolute"; next }
+			my $p = resolve($file, $path);
+			defined $p && defined($to = find_file($p))
+				or do { push @bad, "$file: $url: no such file"; next };
+		}
+		next unless defined $frag && length $frag;
+		next unless $to =~ /\.html\z/;
+		ids_of($to)->{$frag}
+			or push @bad, "$file: $url: no id \"$frag\" in $to";
+	}
+}
+print STDERR "checklinks: $_\n" for @bad;
+printf STDERR "checklinks: %d links in %d pages, %d bad\n", $n, scalar @html, scalar @bad;
+exit(@bad ? 1 : 0);

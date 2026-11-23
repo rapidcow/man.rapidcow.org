@@ -1,0 +1,57 @@
+[%#
+ # pod.tt -- a manual page.  mkman gives:
+ #
+ #   page     sec part name title desc href dist version dist_href
+ #            path source nroff patched
+ #   release  dist version tag commit short date repo tree tag_href latest
+ #   toc      [ { level id text } ]  (the headings, level 1 for =head1)
+ #   body     the HTML of the POD
+-%]
+[% title = page.title _ (page.desc ? ' — ' _ page.desc : '');
+   description = page.desc;
+   wide = 1 -%]
+[% WRAPPER layout.tt -%]
+<div class="manhead" role="presentation">
+	<span>[% page.title | html %]</span>
+	<span class="manhead-mid">User Contributed Perl Documentation</span>
+	<span>[% page.title | html %]</span>
+</div>
+<div class="page">
+<aside class="side">
+	<nav class="toc" aria-labelledby="toc-h">
+		<h2 id="toc-h">Contents</h2>
+		<ul>
+[% FOREACH t IN toc -%]
+			<li class="toc-[% t.level %]"><a href="#[% t.id | uri | html %]">[% t.text %]</a></li>
+[% END -%]
+		</ul>
+	</nav>
+	<section class="vinfo" aria-labelledby="vinfo-h">
+		<h2 id="vinfo-h">Version</h2>
+		<dl>
+			<dt>Dist</dt>
+			<dd><a href="[% page.dist_href | html %]">[% release.dist | html %]</a></dd>
+			<dt>Version</dt>
+			<dd>[% release.version | html %][% IF release.latest %] <span class="tag">latest</span>[% END %]</dd>
+			<dt>Tag</dt>
+			<dd><a href="[% release.tag_href | html %]"><code>[% release.tag | html %]</code></a></dd>
+			<dt>Commit</dt>
+			<dd><a href="[% release.tree | html %]" title="[% release.commit | html %]"><code>[% release.short | html %]</code></a>, [% release.date | html %]</dd>
+			<dt>Source</dt>
+			<dd><a href="[% page.source | html %]"><code>[% page.path | html %]</code></a>[% IF page.patched %] <span class="tag" title="This page has a local patch on top of the release">patched</span>[% END %]</dd>
+			<dt>nroff</dt>
+			<dd><a href="[% page.nroff | html %]" download><code>[% page.name | html %].[% page.sec | html %]</code></a></dd>
+		</dl>
+	</section>
+</aside>
+<article class="pod">
+<h1 class="pagename"><span class="pn-name">[% page.name | html %]</span><span class="pn-sec">([% page.sec | html %])</span></h1>
+[% body %]
+</article>
+</div>
+<div class="manfoot" role="presentation">
+	<span>[% release.dist | html %] [% release.version | html %]</span>
+	<span class="manfoot-mid">[% release.date | html %]</span>
+	<span>[% page.title | html %]</span>
+</div>
+[% END -%]

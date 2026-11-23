@@ -5,6 +5,7 @@ on:
     branches: [gh-pages]
     paths-ignore:
       - "configure.*"
+      - "README"
       - "README.md"
       - "view"
   workflow_dispatch:
@@ -19,15 +20,22 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The build script, www-siteconf, comes from one repository in three
-  # parts: engine needs gengenlib, and the web preset (configure, and
-  # the render script) needs genlib.  Each ref's first component names
-  # the directory to build.
+  # The build script, www-siteconf, comes from one repository in
+  # parts: engine needs gengenlib (which needs codesets and
+  # textdomain), and the web preset (configure) needs genlib and
+  # template-provider.  Each ref's first component names the
+  # directory to build.  Listed in (rough) topological order.
+  #
+  # (These are the tools that build the site, not the documentation
+  # it publishes: that is in src/, taken by ./snapshot from the tags
+  # that catalog names.)
   SITECONF_URL: https://github.com/rapidcow/siteconf.git
+  CODESETS_REF: codesets/v0.00_00
+  TEXTDOMAIN_REF: textdomain/v0.00_00
   GENGENLIB_REF: gengenlib/v0.01_00
-  GENLIB_REF: genlib/v0.02_03
-  ENGINE_REF: engine/v0.03_00
+  GENLIB_REF: genlib/v0.03_00
   TEMPLATE_PROVIDER_REF: template-provider/v0.00_00
+  SITECONF_REF: siteconf/v0.03_00
 
 jobs:
   deploy:
@@ -39,21 +47,28 @@ jobs:
       - uses: actions/checkout@v4
 
       # Perl is only needed to build; the site itself is static.
+      # (mkman needs Pod::Simple, Pod::Man and JSON::PP, which are core.)
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libtemplate-perl liburi-perl \
+          sudo apt-get install -y cpanminus make gcc liburi-perl \
             libfile-sharedir-perl libfile-sharedir-install-perl \
             libencode-locale-perl
+
+      # The distro's libtemplate-perl is older than the 3.103 we need,
+      # so install Template Toolkit explicitly from CPAN.
+      - name: Install Template Toolkit 3.103 from CPAN
+        run: |
+          sudo cpanm --notest Template::Toolkit~3.103
 
       - name: Install siteconf
         run: |
           prefix="$RUNNER_TEMP/siteconf"
           export PERL5LIB="$prefix/lib/perl5"
-          for ref in "$GENGENLIB_REF" "$GENLIB_REF" "$TEMPLATE_PROVIDER_REF" "$ENGINE_REF"; do
+          for ref in "$CODESETS_REF" "$TEXTDOMAIN_REF" "$GENGENLIB_REF" "$GENLIB_REF" "$TEMPLATE_PROVIDER_REF" "$SITECONF_REF"; do
             part=${ref%%/*}
             git -c advice.detachedHead=false clone --quiet --depth 1 \
-              --branch "$ref" "$SITECONF_URL" "$RUNNER_TEMP/src/$part"
+              --single-branch --branch "$ref" "$SITECONF_URL" "$RUNNER_TEMP/src/$part"
             (cd "$RUNNER_TEMP/src/$part/$part" &&
               perl Makefile.PL INSTALL_BASE="$prefix" &&
               make && make test && make install)
@@ -61,12 +76,16 @@ jobs:
           echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
           echo "$prefix/bin" >> "$GITHUB_PATH"
 
+      # ./finish -p gives the pages their names with `::' (which
+      # siteconf cannot make) and removes the .ok markers; then every
+      # link in the site must go somewhere.
       - name: Build
         run: |
           ./configure -Db=docs
-          siteconf -g
+          siteconf -gA
           make
-          find docs -name .ok -delete
+          ./finish -p docs
+          ./checklinks docs
 
       - uses: actions/upload-pages-artifact@v3
         with:

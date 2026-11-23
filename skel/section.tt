@@ -1,0 +1,24 @@
+[%#
+ # section.tt -- a list of manual pages: one section (part), or all.
+ # mkman gives title, part (or not), sections: [ { part title href
+ # pages: [ page ... ] } ], where page is as in pod.tt.
+-%]
+[% description = part ? "Manual pages in section $part on man.rapidcow.org" : 'Every manual page on man.rapidcow.org' -%]
+[% WRAPPER layout.tt -%]
+<article class="listing">
+<h1>[% title | html %]</h1>
+[% FOREACH s IN sections -%]
+<section aria-labelledby="sec-[% s.part %]">
+[% UNLESS part -%]
+<h2 id="sec-[% s.part %]"><a href="[% s.href | html %]">Section [% s.part | html %]: [% s.title | html %]</a></h2>
+[% END -%]
+<dl class="pages">
+[% FOREACH p IN s.pages -%]
+	<dt><a href="[% p.href | html %]">[% p.name | html %]</a><span class="pn-sec">([% p.sec | html %])</span></dt>
+	<dd>[% p.desc | html %] <span class="from"><a href="[% p.dist_href | html %]">[% p.dist | html %] [% p.version | html %]</a></span></dd>
+[% END -%]
+</dl>
+</section>
+[% END -%]
+</article>
+[% END -%]

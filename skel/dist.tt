@@ -1,0 +1,39 @@
+[%#
+ # dist.tt -- a distribution: its releases and the pages of the
+ # newest one.  mkman gives dist, latest (a release, as in pod.tt),
+ # releases (newest first), pages (as in pod.tt).
+-%]
+[% title = "$dist $latest.version";
+   description = "Manual pages of $dist $latest.version" -%]
+[% WRAPPER layout.tt -%]
+<article class="listing">
+<h1>[% dist | html %]</h1>
+<p class="lede">Version [% latest.version | html %], tagged
+<a href="[% latest.tag_href | html %]"><code>[% latest.tag | html %]</code></a>
+at <a href="[% latest.tree | html %]" title="[% latest.commit | html %]"><code>[% latest.short | html %]</code></a>
+on [% latest.date | html %], in <a href="[% latest.repo | html %]">[% latest.repo.remove('^https?://') | html %]</a>.</p>
+
+<h2>Pages</h2>
+<dl class="pages">
+[% FOREACH p IN pages -%]
+	<dt><a href="[% p.href | html %]">[% p.name | html %]</a><span class="pn-sec">([% p.sec | html %])</span></dt>
+	<dd>[% p.desc | html %]</dd>
+[% END -%]
+</dl>
+
+<h2>Releases</h2>
+<table class="releases">
+<thead><tr><th scope="col">Version</th><th scope="col">Tag</th><th scope="col">Commit</th><th scope="col">Date</th></tr></thead>
+<tbody>
+[% FOREACH r IN releases -%]
+<tr>
+	<td>[% r.version | html %][% IF r.latest %] <span class="tag">latest</span>[% END %]</td>
+	<td><a href="[% r.tag_href | html %]"><code>[% r.tag | html %]</code></a></td>
+	<td><a href="[% r.tree | html %]" title="[% r.commit | html %]"><code>[% r.short | html %]</code></a></td>
+	<td>[% r.date | html %]</td>
+</tr>
+[% END -%]
+</tbody>
+</table>
+</article>
+[% END -%]

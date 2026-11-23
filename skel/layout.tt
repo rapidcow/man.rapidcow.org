@@ -1,0 +1,43 @@
+[%#
+ # layout.tt -- what every page of man.rapidcow.org is wrapped in.
+ #
+ # Set before the WRAPPER: title (for <title>), description (or not),
+ # wide (the content has a sidebar).  mkman gives: home, css, nav,
+ # canonical, href (a function from a location to a link).
+-%]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[% title | html %]</title>
+[% IF description -%]
+<meta name="description" content="[% description | html %]">
+[% END -%]
+<link rel="canonical" href="[% canonical | html %]">
+<link rel="stylesheet" href="[% css | html %]">
+<meta name="color-scheme" content="light dark">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+	<nav class="topbar-in" aria-label="Site">
+		<a class="brand" href="[% home | html %]"><span class="brand-man">man</span>.rapidcow.org</a>
+		<ul class="sections">
+[% FOREACH s IN nav -%]
+			<li><a href="[% s.href | html %]"[% IF s.here %] aria-current="true"[% END %] title="[% s.title | html %]">[% s.part | html %]<span class="sec-title"> [% s.title | html %]</span></a></li>
+[% END -%]
+			<li><a href="[% href('man/index.html') | html %]">all</a></li>
+		</ul>
+	</nav>
+</header>
+<main id="main" class="[% wide ? 'wide' : 'narrow' %]">
+[% content %]
+</main>
+<footer class="sitefoot">
+	<p>Made with <a href="https://foss.rapidcow.org/project/siteconf/">siteconf</a>
+	and <a href="https://metacpan.org/pod/Pod::Simple::XHTML">Pod::Simple</a>.
+	The documentation is that of the software it documents, under its terms.</p>
+</footer>
+</body>
+</html>

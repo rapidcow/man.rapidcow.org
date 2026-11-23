@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# view -- serve docs/ at http://localhost:8080/ (or -p PORT), finding
+# PATH as PATH.html or PATH/index.html, as GitHub Pages does: the
+# pages link to each other without .html.  Run ./finish first.
+#
+port=8080
+dir=docs
+cd "$(dirname "$0")" || exit
+while getopts hp:d: o
+do
+	case ${o} in
+	h) echo "usage: $0 [-p PORT] [-d DIR]"; exit 0 ;;
+	p) port=${OPTARG} ;;
+	d) dir=${OPTARG} ;;
+	?) exit 2 ;;
+	esac
+done
+exec python3 - "$dir" "$port" <<'PY'
+import http.server, os, sys, urllib.parse
+root, port = sys.argv[1], int(sys.argv[2])
+class Handler(http.server.SimpleHTTPRequestHandler):
+    extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
+                      '.3': 'text/plain; charset=utf-8', '.3pm': 'text/plain; charset=utf-8',
+                      '.1': 'text/plain; charset=utf-8'}
+    def __init__(self, *a, **k):
+        super().__init__(*a, directory=root, **k)
+    def send_head(self):
+        path = urllib.parse.urlsplit(self.path).path
+        local = self.translate_path(path)
+        if not path.endswith('/') and not os.path.exists(local) and os.path.isfile(local + '.html'):
+            self.path = path + '.html'
+        return super().send_head()
+print(f"serving {root} at http://localhost:{port}/", file=sys.stderr)
+http.server.ThreadingHTTPServer(('localhost', port), Handler).serve_forever()
+PY

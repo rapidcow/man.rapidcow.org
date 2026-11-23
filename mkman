@@ -1,0 +1,747 @@
+#!/usr/bin/env perl
+# HAVE: mkman
+# NEED: ${B}/MY/option.mk
+# NEED: catalog
+# NEED: skel/layout.tt skel/pod.tt skel/section.tt skel/dist.tt skel/home.tt
+# NEED: src/I18N-CodeSets/0.00_00/RELEASE
+# NEED: src/L10N-TextDomain/0.00_00/RELEASE
+# NEED: src/WwW-GenGenLib/0.01_00/RELEASE
+# NEED: src/WwW-GenGenLib-Template-Provider/0.00_00/RELEASE
+# NEED: src/WwW-GenLib/0.03_00/RELEASE
+# NEED: src/WwW-SiteConf/0.03_00/RELEASE
+# NEED: src/WwW-SiteConf-L10N/0.00_00/RELEASE
+#
+# (Every release in catalog has a RELEASE file, which ./snapshot
+# writes; list it above when you add one, so that what is made with
+# mkman is made again when it changes.)
+#
+# mkman -- make the manual pages of man.rapidcow.org
+#
+#   mkman [-B dir] prep  TARGET SOURCE [PATCH ...]
+#   mkman [-B dir] xref
+#   mkman [-B dir] page  TARGET           (man/S/NAME.html)
+#   mkman [-B dir] nroff TARGET           (man/S/NAME.S, .3pm, ...)
+#   mkman [-B dir] index TARGET           (index.html, man/..., dist/...)
+#
+# Run from the project root (${A}), as render is.  TARGET is ${@}:
+# relative to ${B}/${c} for prep, to ${B}/${b} for the rest.
+#
+#   prep   copies SOURCE (a file in src/, as snapshot left it) into
+#          the cache, and applies the PATCHes to the copy there.
+#          A page's patch is patch/TARGET.patch (TARGET being the
+#          cache name); it must be a prerequisite of the rule, and so
+#          must be given.
+#   xref   reads every page in the cache and writes ${c}/xref.json:
+#          what each page is called, and its anchors, for links.
+#   page   writes the HTML page; nroff, the manual page itself.
+#   index  writes the pages that list other pages.
+#
+# A file name cannot have a colon in it (siteconf will not make one),
+# so RdKw::WwW::GenLib is made as RdKw..WwW..GenLib (no Perl module
+# name has `..' in it), and ./finish names it back after the build.
+# Links are written as the finished names: the site works after
+# ./finish, not before.
+#
+use utf8;
+use 5.010;
+use strict;
+use warnings;
+
+use Digest::SHA ();
+use Encode ();
+use File::Basename qw( dirname );
+use File::Copy qw( copy );
+use File::Path qw( make_path );
+use Getopt::Long qw( GetOptions );
+use JSON::PP ();
+use Pod::Man ();
+use Template;
+
+use RdKw::WwW::GenGenLib 0.0100 qw( load_state );
+use RdKw::WwW::GenLib 0.0300 qw( relapath );
+
+binmode STDERR, ':encoding(UTF-8)';
+
+my $B = '.';
+Getopt::Long::Configure(qw( bundling no_ignore_case require_order ));
+GetOptions('B=s' => \$B) && @ARGV
+	or die "usage: $0 [-B dir] prep|xref|page|nroff|index ...\n";
+my $cmd = shift @ARGV;
+
+my %S = load_state($B, prog => 'mkman');
+my ($D, $O) = @S{qw( config option )};
+my $bdir = "$B/$D->{b}";
+my $cdir = "$B/$D->{c}";
+
+# Links are written without .html (and index.html) for a web server
+# that finds them anyway, as GitHub Pages does; not for file: URLs.
+my $pretty = $O->{site_url} =~ m{\Ahttps?://}i;
+my $site = $O->{site_url};
+$site =~ s{/+\z}{};
+my $base = defined $O->{base_url} && length $O->{base_url} ? $O->{base_url} : '/';
+$base =~ s{\A/*}{/};
+$base =~ s{/*\z}{/};
+
+#
+# The sections we know of.  The section of a page (3pm) is a part
+# (3) and a suffix, and it is published in man/PART/.
+#
+my %SECTION = (
+	1 => 'General commands',
+	2 => 'System calls',
+	3 => 'Library functions',
+	4 => 'Special files',
+	5 => 'File formats',
+	6 => 'Games',
+	7 => 'Miscellanea',
+	8 => 'System administration',
+);
+sub part { my ($sec) = @_; $sec =~ /\A([1-9])/ or die "mkman: bad section `$sec'\n"; $1 }
+
+###
+### The catalog
+###
+my (@release, %release, @page, %latest);
+{
+	my $web;
+	open my $fh, '<:encoding(UTF-8)', 'catalog' or die "mkman: catalog: $!\n";
+	while (<$fh>) {
+		s/(?:^|\s)#.*//;
+		my @f = split;
+		@f or next;
+		my $what = shift @f;
+		my $where = "catalog line $.";
+		if ($what eq 'release') {
+			@f >= 3 or die "mkman: $where: release DIST VERSION TAG [REPO]\n";
+			$web = $f[3] if defined $f[3];
+			my $r = { dist => $f[0], version => $f[1], tag => $f[2] };
+			my $id = "$r->{dist}/$r->{version}";
+			$release{$id} and die "mkman: $where: $id again\n";
+			# what snapshot says (and repo is the one it says, too)
+			open my $rf, '<', "src/$id/RELEASE"
+				or die "mkman: src/$id/RELEASE: $! (run ./snapshot $id?)\n";
+			while (<$rf>) { /\A(\w+)\s+(.*?)\s*\z/ and $r->{$1} = $2 }
+			close $rf;
+			$r->{tag} eq $f[2] or die "mkman: src/$id/RELEASE is of"
+				. " $r->{tag}, but catalog says $f[2] (run ./snapshot $id)\n";
+			($r->{day}) = $r->{date} =~ /\A(\d{4}-\d\d-\d\d)/;
+			$r->{short} = substr $r->{commit}, 0, 7;
+			push @release, $release{$id} = $r;
+			$latest{$r->{dist}} = $r;
+		} elsif ($what eq 'page') {
+			@f == 5 or die "mkman: $where: page SECTION NAME DIST VERSION PATH\n";
+			my $p = { sec => $f[0], name => $f[1], dist => $f[2],
+				version => $f[3], path => $f[4] };
+			part($p->{sec});
+			$p->{name} =~ /\.\.|[\/\s]/ and die "mkman: $where: bad name `$p->{name}'\n";
+			$p->{release} = $release{"$p->{dist}/$p->{version}"}
+				or die "mkman: $where: no release $p->{dist} $p->{version}\n";
+			$p->{src} = "src/$p->{dist}/$p->{version}/$p->{path}";
+			push @page, $p;
+		} else {
+			die "mkman: $where: what is `$what'?\n";
+		}
+	}
+	close $fh;
+}
+
+# What a page is made as: its stem (where we make it, the name with
+# no colons), and its location (where it ends up, after ./finish).
+# Only the newest release of a dist is published in man/; an older
+# one would go in dist/DIST/VERSION/man/ (and is not made yet).
+sub stem_of { (my $s = $_[0]) =~ s/::/../g; $s }
+for my $p (@page) {
+	my $part = part($p->{sec});
+	my $root = $latest{$p->{dist}} == $p->{release} ? ''
+		: "dist/$p->{dist}/$p->{version}/";
+	$p->{latest} = !length $root;
+	$p->{stem} = "${root}man/$part/" . stem_of($p->{name});
+	$p->{location} = "${root}man/$part/$p->{name}.html";
+	$p->{cache} = "$p->{stem}.pod";
+}
+my @current = grep { $_->{latest} } @page;
+{
+	my %seen;
+	for (@current) {
+		my $k = part($_->{sec}) . "/$_->{name}";
+		$seen{$k}++ and die "mkman: $_->{name}($_->{sec}) is in two dists\n";
+	}
+}
+my %by_stem = map { ($_->{stem} => $_) } @page;
+
+sub page_of
+{
+	my ($target, $ext) = @_;
+	(my $stem = $target) =~ s/\.\Q$ext\E\z//
+		or die "mkman: $target: not a .$ext\n";
+	$by_stem{$stem} or die "mkman: $target: not in catalog\n";
+}
+
+sub slurp
+{
+	my ($file, $layer) = @_;
+	open my $fh, '<' . ($layer || ':raw'), $file or die "mkman: $file: $!\n";
+	local $/;
+	my $s = <$fh>;
+	close $fh;
+	$s;
+}
+
+# Write a file, through a temporary one, so that a failure leaves no
+# half-made target behind for make(1) to think is up to date.
+sub spew
+{
+	my ($file, $text, $layer) = @_;
+	make_path(dirname($file));
+	my $tmp = "$file.tmp$$";
+	open my $fh, '>' . ($layer || ':encoding(UTF-8)'), $tmp
+		or die "mkman: $tmp: $!\n";
+	print $fh $text;
+	close $fh or die "mkman: $tmp: $!\n";
+	rename $tmp, $file or die "mkman: rename $tmp: $!\n";
+}
+
+###
+### Links
+###
+
+# A relative link from the page at $from to $to (both locations, as
+# from the site root).  A first segment with a colon in it would be
+# read as a scheme (RdKw::WwW::GenLib.html is a URL of scheme RdKw:),
+# so it is written as ./RdKw::WwW::GenLib.html.
+sub href
+{
+	my ($to, $from) = @_;
+	my ($path, $frag) = $to =~ /\A([^#]*)(#.*)?\z/s;
+	my $rel = length $path ? relapath($path, $from) : '';
+	if ($pretty) {
+		$rel =~ s{(\A|/)index\.html\z}{$1};
+		$rel =~ s{\.html\z}{};
+	}
+	$rel = './' if $rel eq '' && length $path;
+	$rel = "./$rel" if $rel =~ m{\A[^/]*:};
+	$rel . (defined $frag ? uri_frag($frag) : '');
+}
+
+sub canonical
+{
+	my ($loc) = @_;
+	if ($pretty) {
+		$loc =~ s{(\A|/)index\.html\z}{$1};
+		$loc =~ s{\.html\z}{};
+	}
+	$site . $base . $loc;
+}
+
+sub uri_frag
+{
+	my ($f) = @_;
+	$f =~ s{([^A-Za-z0-9\-._~!\$&'()*+,;=:@/?#])}{
+		join '', map { sprintf '%%%02X', $_ } unpack 'C*', Encode::encode('UTF-8', $1)
+	}ge;
+	$f;
+}
+
+###
+### The POD formatter
+###
+package MkMan::XHTML;
+use parent -norequire, 'Pod::Simple::XHTML';
+BEGIN { require Pod::Simple::XHTML; }
+
+sub new
+{
+	my ($class, %arg) = @_;
+	my $self = $class->SUPER::new;
+	$self->{mk} = \%arg;
+	$self->{mk_anchors} = [];
+	$self->html_header('');
+	$self->html_footer('');
+	$self->html_h_level(2);
+	$self->anchor_items(1);
+	# the same output whether or not HTML::Entities is installed
+	$self->html_encode_chars(q{&<>"'});
+	$self->index(0);
+	$self->backlink(0);
+	$self->complain_stderr(1);
+	$self;
+}
+
+# Every id that we make goes into xref.json, with what it was made
+# from: that is how links into this page find it.
+sub idify
+{
+	my ($self, $t, $not_unique) = @_;
+	my $id = $self->SUPER::idify($t, $not_unique);
+	push @{ $self->{mk_anchors} }, [ $id, $t ] unless $not_unique;
+	$id;
+}
+
+sub resolve_pod_page_link
+{
+	my ($self, $to, $section) = @_;
+	$self->{mk}{pod_link}->($to, $section);
+}
+
+sub resolve_man_page_link
+{
+	my ($self, $to, $section) = @_;
+	$self->{mk}{man_link}->($to, $section);
+}
+
+package main;
+
+# Format a POD file.  %arg: pod_link and man_link (the resolvers);
+# returns the body (as characters) and the anchors.
+sub format_pod
+{
+	my ($file, %arg) = @_;
+	my $px = MkMan::XHTML->new(
+		pod_link => $arg{pod_link} || sub { undef },
+		man_link => $arg{man_link} || sub { undef },
+	);
+	my $html = '';
+	$px->output_string(\$html);
+	$px->parse_file($file);
+	$px->any_errata_seen and die "mkman: $file: POD errors (see above)\n";
+	$html = Encode::decode('UTF-8', $html) unless utf8::is_utf8($html);
+	($html, $px->{mk_anchors});
+}
+
+# The NAME line of a POD file: "Foo::Bar - what it is"
+sub describe
+{
+	my ($file) = @_;
+	my $pod = slurp($file, ':encoding(UTF-8)');
+	my ($para) = $pod =~ /^=head1\s+NAME[ \t]*\n\s*\n(.*?)(?:\n[ \t]*\n|\z)/ms
+		or return '';
+	$para =~ s/[A-Z]<<+\s+(.*?)\s+>>+/$1/gs;
+	1 while $para =~ s/[A-Z]<([^<>]*)>/$1/g;
+	$para =~ s/\s+/ /g;
+	my (undef, $desc) = split /\s+-+\s+/, $para, 2;
+	defined $desc ? $desc : '';
+}
+
+###
+### Highlighting, which is done here so that the site needs no
+### script.  It knows nothing of languages: comments, strings and
+### variables are much the same in Perl, sh(1) and make(1), which is
+### what the verbatim paragraphs of our pages are, and the keywords
+### are Perl's.
+###
+my $KEYWORD = join '|', qw(
+	my our local sub use no require package return if elsif else
+	unless while until for foreach last next redo die eval do
+	BEGIN END defined undef ref bless exists delete wantarray
+	print printf open close binmode qw local );
+
+sub esc
+{
+	my ($s) = @_;
+	$s =~ s/&/&amp;/g; $s =~ s/</&lt;/g; $s =~ s/>/&gt;/g; $s =~ s/"/&quot;/g;
+	$s;
+}
+
+sub unesc
+{
+	my ($s) = @_;
+	$s =~ s/&lt;/</g; $s =~ s/&gt;/>/g; $s =~ s/&quot;/"/g; $s =~ s/&#39;/'/g;
+	$s =~ s/&#(\d+);/chr $1/ge; $s =~ s/&#x([0-9a-f]+);/chr hex $1/gie;
+	$s =~ s/&amp;/&/g;
+	$s;
+}
+
+sub highlight
+{
+	my ($code) = @_;
+	my $out = '';
+	pos($code) = 0;
+	while (pos($code) < length $code) {
+		if ($code =~ /\G((?:^|(?<=\s))#[^\n]*)/gcm) {
+			$out .= '<span class="hl-c">' . esc($1) . '</span>';
+		} elsif ($code =~ /\G("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')/gc) {
+			$out .= '<span class="hl-s">' . esc($1) . '</span>';
+		} elsif ($code =~ /\G(\$\{[^{}\n]*\}|\$#?\w+(?:::\w+)*|[\@%]\w+(?:::\w+)*|\$[!\@\/\\,;.0&_^]|\$\$)/gc) {
+			$out .= '<span class="hl-v">' . esc($1) . '</span>';
+		} elsif ($code =~ /\G(?<![\w\-\$\@%])((?:$KEYWORD))(?![\w\-])/gco) {
+			$out .= '<span class="hl-k">' . esc($1) . '</span>';
+		} elsif ($code =~ /\G(\w+|\s+|.)/gcs) {
+			$out .= esc($1);
+		}
+	}
+	$out;
+}
+
+# A verbatim paragraph is indented to be one; the indentation that
+# all its lines have is not part of the code.
+sub dedent
+{
+	my ($code) = @_;
+	# leading tabs to spaces, to the next multiple of 8
+	$code =~ s{^([ \t]+)}{
+		my $n = 0;
+		$n = $_ eq "\t" ? ($n + 8) - ($n % 8) : $n + 1 for split //, $1;
+		' ' x $n
+	}mge;
+	my $min;
+	for ($code =~ /^( *)\S/mg) {
+		$min = length($_) if !defined $min || length($_) < $min;
+	}
+	$code =~ s/^ {$min}//mg if $min;
+	$code;
+}
+
+# Turn what Pod::Simple::XHTML made into what we serve: links on the
+# headings and items, a table of contents, and highlighted code.
+sub dress
+{
+	my ($html) = @_;
+	my @toc;
+	$html =~ s{<h([2-6]) id="([^"]+)">(.*?)</h\1>}{
+		my ($h, $id, $text) = ($1, $2, $3);
+		(my $plain = $text) =~ s/<[^>]*>//g;
+		push @toc, { level => $h - 1, id => $id, text => $plain } if $h <= 4;
+		qq{<h$h id="$id">$text<a class="pilcrow" href="#$id" aria-label="Link to this section">¶</a></h$h>}
+	}gse;
+	$html =~ s{<dt id="([^"]+)">(.*?)</dt>}{
+		qq{<dt id="$1">$2<a class="pilcrow" href="#$1" aria-label="Link to this item">¶</a></dt>}
+	}gse;
+	$html =~ s{<pre><code>(.*?)</code></pre>}{
+		'<pre><code>' . highlight(dedent(unesc($1))) . '</code></pre>'
+	}gse;
+	($html, \@toc);
+}
+
+###
+### Templates
+###
+my $tt = Template->new({
+	INCLUDE_PATH => 'skel',
+	ENCODING => 'UTF-8',
+	STRICT => 1,
+	TRIM => 1,
+}) or die "mkman: [TT] $Template::ERROR\n";
+
+sub css_version
+{
+	my $css = "$bdir/assets/man.css";
+	my $d = Digest::SHA->new(1);
+	$d->addfile($css, 'b');
+	(my $v = substr($d->b64digest, 0, 10)) =~ tr{+/}{-_};
+	$v;
+}
+
+sub nav
+{
+	my ($loc) = @_;
+	my %have = map { (part($_->{sec}) => 1) } @current;
+	[ map { +{ part => $_, title => $SECTION{$_}, href => href("man/$_/index.html", $loc),
+		here => ($loc =~ m{\Aman/$_/} ? 1 : 0) } }
+		sort keys %have ];
+}
+
+sub render
+{
+	my ($template, $loc, $out, %v) = @_;
+	my $text = '';
+	$tt->process($template, {
+		wide => 0, description => '', part => '',
+		%v,
+		location => $loc,
+		canonical => canonical($loc),
+		home => href('index.html', $loc),
+		css => href('assets/man.css', $loc) . '?v=' . css_version(),
+		nav => nav($loc),
+		href => sub { href($_[0], $loc) },
+	}, \$text) or die "mkman: [TT] " . $tt->error . "\n";
+	spew("$bdir/$out", $text);
+}
+
+sub xref
+{
+	my $file = "$cdir/xref.json";
+	JSON::PP->new->utf8->decode(slurp($file));
+}
+
+# What the template needs to know of a page
+sub page_info
+{
+	my ($p, $loc, $X) = @_;
+	my $r = $p->{release};
+	return {
+		sec => $p->{sec}, part => part($p->{sec}), name => $p->{name},
+		title => "$p->{name}($p->{sec})",
+		desc => $X ? $X->{"$p->{sec} $p->{name}"}{desc} : '',
+		href => href($p->{location}, $loc),
+		dist => $p->{dist}, version => $p->{version},
+		dist_href => href("dist/$p->{dist}/index.html", $loc),
+		path => $p->{path},
+		source => "$r->{repo}/blob/$r->{commit}/$p->{path}",
+		nroff => href("man/" . part($p->{sec}) . "/$p->{name}.$p->{sec}", $loc),
+		patched => -e "patch/$p->{cache}.patch" ? 1 : 0,
+	};
+}
+
+sub release_info
+{
+	my ($r) = @_;
+	return {
+		dist => $r->{dist}, version => $r->{version}, tag => $r->{tag},
+		commit => $r->{commit}, short => $r->{short}, date => $r->{day},
+		repo => $r->{repo},
+		tree => "$r->{repo}/tree/$r->{commit}",
+		tag_href => "$r->{repo}/releases/tag/$r->{tag}",
+		latest => $latest{$r->{dist}} == $r ? 1 : 0,
+	};
+}
+
+###
+### Commands
+###
+my %cmd;
+
+$cmd{prep} = sub {
+	@_ >= 2 or die "usage: mkman prep TARGET SOURCE [PATCH ...]\n";
+	my ($target, $source, @patch) = @_;
+	(my $src = $source) =~ s{\A(?:\./)+}{};
+	my $p = page_of($target, 'pod');
+	$src eq $p->{src} or die "mkman: $target is made from $p->{src}"
+		. " (says catalog), not $src: see Makefile.in\n";
+	my $own = "patch/$target.patch";
+	if (-e $own && !grep { (my $x = $_) =~ s{\A(?:\./)+}{}; $x eq $own } @patch) {
+		die "mkman: $own is not a prerequisite of \${c}/$target"
+			. " in Makefile.in (add it, so make knows)\n";
+	}
+	my $out = "$cdir/$target";
+	my $tmp = "$out.tmp$$";
+	make_path(dirname($out));
+	copy($src, $tmp) or die "mkman: copy $src: $!\n";
+	for my $patch (@patch) {
+		# fuzz is not allowed: a hunk that lands somewhere else is
+		# worse than one that does not land (the same as ./upgrade)
+		system('patch', '-s', '-F', '0', '-i', $patch, $tmp) == 0
+			or do { unlink $tmp, "$tmp.orig", "$tmp.rej";
+				die "mkman: $patch does not apply to $src\n" };
+		unlink "$tmp.orig";
+	}
+	rename $tmp, $out or die "mkman: rename $tmp: $!\n";
+};
+
+$cmd{xref} = sub {
+	@_ and die "usage: mkman xref\n";
+	my %X;
+	for my $p (@current) {
+		my $file = "$cdir/$p->{cache}";
+		-f $file or die "mkman: $file is missing:"
+			. " is $p->{name}($p->{sec}) in Makefile.in?\n";
+		my (undef, $anchors) = format_pod($file);
+		$X{"$p->{sec} $p->{name}"} = {
+			anchors => $anchors,
+			desc => describe($file),
+		};
+	}
+	spew("$cdir/xref.json", JSON::PP->new->utf8->canonical->pretty->encode(\%X), ':raw');
+};
+
+# Where a link goes: a page of ours (and an anchor in it), or not.
+sub find_anchor
+{
+	my ($anchors, $section) = @_;
+	(my $want = $section) =~ s/\s+/ /g;
+	$want =~ s/\A | \z//g;
+	for (@$anchors) {
+		(my $t = $_->[1]) =~ s/\s+/ /g;
+		$t =~ s/\A | \z//g;
+		return $_->[0] if $t eq $want;
+	}
+	# =item new B => dir ... is linked as L</new>, and so on
+	for (@$anchors) {
+		return $_->[0] if grep { $_ eq $want } item_keys($_->[1]);
+	}
+	undef;
+}
+
+# The names an item may be linked by, other than all of it:
+#
+#   new B => dir[, ...]               new
+#   cs->to_fs( name, ... )            to_fs (and cs->to_fs)
+#   CLASS->locale([ codesets ])       locale
+#   stdin, stdout, stderr             stdin, stdout, stderr
+#   -C codeset                        -C
+sub item_keys
+{
+	my ($text) = @_;
+	my @key;
+	my ($first) = $text =~ /\A\s*(\S+)/ or return;
+	push @key, $first;
+	# a method, called on something
+	if ($text =~ /\A\s*[\w\$:]+\s*->\s*([\w:]+)/) {
+		push @key, $1;
+		(my $call) = $text =~ /\A\s*([\w\$:]+\s*->\s*[\w:]+)/;
+		push @key, $call;
+	}
+	# a name and its arguments
+	push @key, $1 if $text =~ /\A\s*([\w:]+)\s*[(\[]/;
+	# a list of names
+	if ($text =~ /\A\s*([\w:]+(?:\s*,\s*[\w:]+)+)\s*\z/) {
+		push @key, split /\s*,\s*/, $1;
+	}
+	@key;
+}
+
+$cmd{page} = sub {
+	@_ == 1 or die "usage: mkman page TARGET\n";
+	my ($target) = @_;
+	my $p = page_of($target, 'html');
+	my $loc = $p->{location};
+	my $X = xref();
+	my @error;
+
+	my %by_name;
+	push @{ $by_name{$_->{name}} }, $_ for @current;
+
+	my $local = sub {
+		my ($q, $section, $what) = @_;
+		my $frag = '';
+		if (defined $section) {
+			my $a = $X->{"$q->{sec} $q->{name}"}{anchors};
+			my $id = find_anchor($a, $section);
+			defined $id or do {
+				push @error, "$what: no section \"$section\" in $q->{name}($q->{sec})";
+				return undef;
+			};
+			$frag = "#$id";
+		}
+		href($q == $p ? '' : $q->{location}, $loc) . $frag;
+	};
+
+	my $pod_link = sub {
+		my ($to, $section) = @_;
+		my $what = 'L<' . (defined $to ? $to : '') . (defined $section ? "/$section" : '') . '>';
+		return $local->($p, $section, $what) unless defined $to;
+		if (my $q = $by_name{$to}) {
+			@$q == 1 or do { push @error, "$what: which? "
+				. join(', ', map { "$_->{name}($_->{sec})" } @$q); return undef };
+			return $local->($q->[0], $section, $what);
+		}
+		if ($to =~ /\ARdKw::/) {
+			push @error, "$what: no such page here";
+			return undef;
+		}
+		my $id = defined $section ? MkMan::XHTML->new->idify($section, 1) : undef;
+		if ($to eq 'perlfunc' && defined $section) {
+			my ($fn) = $section =~ /\A\s*(\S+)/;
+			return "https://perldoc.perl.org/functions/$fn";
+		}
+		if ($to =~ /\Aperl\w*\z/) {
+			return "https://perldoc.perl.org/$to" . (defined $id ? "#$id" : '');
+		}
+		"https://metacpan.org/pod/$to" . (defined $id ? "#$id" : '');
+	};
+
+	my $man_link = sub {
+		my ($to, $section) = @_;
+		my ($name, $sec) = $to =~ /\A\s*([^\s(]+)\s*(?:\(\s*([^\s)]+)\s*\))?\s*\z/
+			or return undef;
+		$sec = 1 unless defined $sec;
+		for my $q (@current) {
+			return $local->($q, $section, "L<$to>")
+				if $q->{name} eq $name && part($q->{sec}) eq part($sec);
+		}
+		return "https://perldoc.perl.org/$name" if $name =~ /\Aperl\w*\z/;
+		# Not ours: -Oman_url=https://man.example/%n.%s (%n is
+		# the name, %s the section, %% a percent), or no link.
+		my $fmt = $O->{man_url};
+		return undef unless defined $fmt && length $fmt;
+		$fmt =~ s{%([ns%])}{ $1 eq 'n' ? $name : $1 eq 's' ? $sec : '%' }ge;
+		$fmt;
+	};
+
+	my ($body, $anchors) = format_pod("$cdir/$p->{cache}",
+		pod_link => $pod_link, man_link => $man_link);
+	@error and die map { "mkman: $p->{name}($p->{sec}): $_\n" } @error;
+	my ($html, $toc) = dress($body);
+
+	render('pod.tt', $loc, $target,
+		page => page_info($p, $loc, $X),
+		release => release_info($p->{release}),
+		toc => $toc,
+		body => $html,
+	);
+};
+
+$cmd{nroff} = sub {
+	@_ == 1 or die "usage: mkman nroff TARGET\n";
+	my ($target) = @_;
+	my ($stem, $ext) = $target =~ /\A(.*)\.([^.\/]+)\z/
+		or die "mkman: $target: no section suffix\n";
+	my $p = $by_stem{$stem} or die "mkman: $target: not in catalog\n";
+	$ext eq $p->{sec} || $ext eq part($p->{sec})
+		or die "mkman: $target: $p->{name} is in section $p->{sec}\n";
+	my $r = $p->{release};
+	my $pm = Pod::Man->new(
+		name => $p->{name},
+		section => $p->{sec},
+		center => 'User Contributed Perl Documentation',
+		release => "$r->{dist} $r->{version}",
+		date => $r->{day},
+		errors => 'die',
+	);
+	my $out = '';
+	$pm->output_string(\$out);
+	$pm->parse_file("$cdir/$p->{cache}");
+	spew("$bdir/$target", $out, ':raw');
+};
+
+$cmd{index} = sub {
+	@_ == 1 or die "usage: mkman index TARGET\n";
+	my ($target) = @_;
+	my $X = xref();
+	my $loc = $target;
+	my @sorted = sort { part($a->{sec}) <=> part($b->{sec}) || lc $a->{name} cmp lc $b->{name} } @current;
+
+	my %dists;
+	$dists{$_->{dist}} = 1 for @release;
+	my $dists = [ map {
+		my $r = $latest{$_};
+		+{ %{ release_info($r) }, href => href("dist/$_/index.html", $loc),
+		  pages => scalar grep { $_->{release} == $r } @current }
+	} sort keys %dists ];
+
+	my $sections = sub {
+		my ($only) = @_;
+		my %by;
+		push @{ $by{part($_->{sec})} }, page_info($_, $loc, $X) for @sorted;
+		[ map { +{ part => $_, title => $SECTION{$_},
+			href => href("man/$_/index.html", $loc), pages => $by{$_} } }
+		  grep { !defined $only || $_ eq $only } sort keys %by ];
+	};
+
+	if ($target eq 'index.html') {
+		render('home.tt', $loc, $target,
+			sections => $sections->(), dists => $dists, count => scalar @current);
+	} elsif ($target eq 'man/index.html') {
+		render('section.tt', $loc, $target,
+			title => 'All manual pages', sections => $sections->());
+	} elsif ($target =~ m{\Aman/([1-9])/index\.html\z}) {
+		my $s = $sections->($1);
+		@$s or die "mkman: $target: no pages in section $1\n";
+		render('section.tt', $loc, $target,
+			title => "Section $1: $SECTION{$1}", part => $1, sections => $s);
+	} elsif ($target =~ m{\Adist/([^/]+)/index\.html\z}) {
+		my $dist = $1;
+		$latest{$dist} or die "mkman: $target: no dist $dist in catalog\n";
+		render('dist.tt', $loc, $target,
+			dist => $dist,
+			latest => release_info($latest{$dist}),
+			releases => [ map { release_info($_) } reverse grep { $_->{dist} eq $dist } @release ],
+			pages => [ map { page_info($_, $loc, $X) } grep { $_->{release} == $latest{$dist} } @sorted ],
+		);
+	} else {
+		die "mkman: $target: not an index I know of\n";
+	}
+};
+
+$cmd{$cmd} or die "mkman: what is `$cmd'?\n";
+$cmd{$cmd}->(@ARGV);
+exit 0;

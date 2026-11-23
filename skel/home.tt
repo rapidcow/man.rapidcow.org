@@ -1,0 +1,38 @@
+[%#
+ # home.tt -- the front page.  mkman gives sections (as in
+ # section.tt), dists (releases, as in pod.tt, with href and
+ # pages: how many), count (of pages).
+-%]
+[% title = 'man.rapidcow.org';
+   description = 'Manual pages and POD documentation of rapidcow’s software' -%]
+[% WRAPPER layout.tt -%]
+<article class="listing">
+<h1>man.rapidcow.org</h1>
+<p class="lede">Manual pages of my software, as of its latest releases:
+[% count %] pages for now, all from
+<a href="https://foss.rapidcow.org/project/siteconf/">siteconf</a>.</p>
+
+<h2>Sections</h2>
+<ul class="sectionlist">
+[% FOREACH s IN sections -%]
+	<li><a href="[% s.href | html %]"><span class="secno">[% s.part | html %]</span> [% s.title | html %]</a>
+	<span class="count">[% s.pages.size %] page[% s.pages.size == 1 ? '' : 's' %]</span></li>
+[% END -%]
+</ul>
+
+<h2>Distributions</h2>
+<table class="releases">
+<thead><tr><th scope="col">Dist</th><th scope="col">Version</th><th scope="col">Tag</th><th scope="col">Date</th></tr></thead>
+<tbody>
+[% FOREACH d IN dists -%]
+<tr>
+	<td><a href="[% d.href | html %]">[% d.dist | html %]</a></td>
+	<td>[% d.version | html %]</td>
+	<td><a href="[% d.tag_href | html %]"><code>[% d.tag | html %]</code></a></td>
+	<td>[% d.date | html %]</td>
+</tr>
+[% END -%]
+</tbody>
+</table>
+</article>
+[% END -%]

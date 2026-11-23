@@ -5,4 +5,12 @@
 *.rej
 *.new
 *.old
+*.tmp[0-9]*
+
+# what ./configure, siteconf -g and make write
 .cache/
+MY/
+Makefile
+build.ninja
+.ninja_log
+docs/

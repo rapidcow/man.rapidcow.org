@@ -1,0 +1,96 @@
+#!/usr/bin/env perl
+#
+# snapshot -- copy what catalog publishes out of the Git repository
+#
+#   ./snapshot [-r repo] [dist[/version] ...]
+#
+# For each release line of catalog (or only those named), write the
+# files its pages are made from, as they are at its tag, into
+# src/DIST/VERSION/PATH, and src/DIST/VERSION/RELEASE, which says
+# what was copied from where:
+#
+#   tag      genlib/v0.03_00
+#   commit   e2035045...           (full hash)
+#   date     2026-11-20T...        (committer date, ISO 8601)
+#   repo     https://github.com/rapidcow/siteconf
+#
+# The build reads these, not the repository: so CI needs no clone,
+# and a release, once taken, is what it is (tags may move; the commit
+# says which one this was).  Run this after adding a release or page
+# to catalog, and commit what it writes.
+#
+# The repository is ../../project/siteconf (from here) by default,
+# or SNAPSHOT_REPO, or -r.
+#
+use 5.008;
+use strict;
+use warnings;
+
+use File::Basename qw( dirname );
+use File::Path qw( make_path );
+use Getopt::Long qw( GetOptions );
+
+chdir dirname($0) or die "snapshot: chdir: $!\n";
+
+my $repo = $ENV{SNAPSHOT_REPO} || '../../project/siteconf';
+GetOptions('r=s' => \$repo)
+	or die "usage: $0 [-r repo] [dist[/version] ...]\n";
+my %only = map { $_ => 1 } @ARGV;
+
+my (@release, @page, $web);
+open my $cat, '<', 'catalog' or die "snapshot: catalog: $!\n";
+while (<$cat>) {
+	s/(?:^|\s)#.*//;
+	my @f = split;
+	@f or next;
+	my $what = shift @f;
+	if ($what eq 'release') {
+		@f >= 3 or die "snapshot: catalog line $.: release DIST VERSION TAG [REPO]\n";
+		$web = $f[3] if defined $f[3];
+		defined $web or die "snapshot: catalog line $.: no REPO yet\n";
+		push @release, { dist => $f[0], version => $f[1], tag => $f[2], repo => $web };
+	} elsif ($what eq 'page') {
+		@f == 5 or die "snapshot: catalog line $.: page SECTION NAME DIST VERSION PATH\n";
+		push @page, { dist => $f[2], version => $f[3], path => $f[4] };
+	} else {
+		die "snapshot: catalog line $.: what is `$what'?\n";
+	}
+}
+close $cat;
+
+sub git
+{
+	my @cmd = ('git', '-C', $repo, @_);
+	open my $fh, '-|', @cmd or die "snapshot: git: $!\n";
+	binmode $fh;
+	local $/;
+	my $out = <$fh>;
+	close $fh or die "snapshot: `@cmd' failed\n";
+	$out;
+}
+
+my $n = 0;
+for my $r (@release) {
+	my $id = "$r->{dist}/$r->{version}";
+	next if %only && !$only{$r->{dist}} && !$only{$id};
+	my $dir = "src/$id";
+	chomp(my $commit = git('rev-parse', '--verify', "$r->{tag}^{commit}"));
+	chomp(my $date = git('log', '-1', '--format=%cI', $commit));
+	for my $p (grep { "$_->{dist}/$_->{version}" eq $id } @page) {
+		my $out = "$dir/$p->{path}";
+		make_path(dirname($out));
+		open my $fh, '>:raw', $out or die "snapshot: $out: $!\n";
+		print $fh git('show', "$commit:$p->{path}");
+		close $fh or die "snapshot: $out: $!\n";
+		print STDERR "$out\n";
+	}
+	open my $fh, '>', "$dir/RELEASE" or die "snapshot: $dir/RELEASE: $!\n";
+	print $fh "tag      $r->{tag}\n";
+	print $fh "commit   $commit\n";
+	print $fh "date     $date\n";
+	print $fh "repo     $r->{repo}\n";
+	close $fh or die "snapshot: $dir/RELEASE: $!\n";
+	print STDERR "$dir/RELEASE\n";
+	$n++;
+}
+$n or die "snapshot: nothing to do\n";

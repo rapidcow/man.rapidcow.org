@@ -1,0 +1,147 @@
+#
+# Transformation rules: from ${a}/% (which is `.', the whole tree) to
+# ${b}/% (docs/), by way of ${c}/% (.cache/) for the manual pages.
+#
+# A manual page is made in three steps:
+#
+#   src/DIST/VERSION/PATH          as ./snapshot took it from the tag
+#   ${c}/man/S/NAME.pod            the same, with patch/man/S/NAME.pod.patch
+#                                  applied, if there is one
+#   ${b}/man/S/NAME.html           the page; also .S (and .3pm) in nroff
+#
+# where NAME is the page's name with `::' spelled `..', since siteconf
+# does not make file names with colons in them.  ./finish names them
+# back, after the build.
+#
+# To add a page: a `page' line in catalog, ./snapshot, then here a
+# rule for the cache, the page in the lists of xref.json, of the
+# HTML pages and of the nroff ones, and in MANIFEST, too.
+#
+# To patch a page: write patch/man/S/NAME.pod.patch, against the file
+# in src/, and add it to the prerequisites of the cache rule below
+# (after the source, which comes first).  mkman will not let you
+# forget the second part.
+#
+
+#
+# the source, with what we have to say about it
+#
+${c}/man/1/siteconf.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/script/siteconf ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..I18N..CodeSets.pod: ${a}/src/I18N-CodeSets/0.00_00/codesets/lib/RdKw/I18N/CodeSets.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..I18N..CodeSets..Functions.pod: ${a}/src/I18N-CodeSets/0.00_00/codesets/lib/RdKw/I18N/CodeSets/Functions.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..L10N..TextDomain.pod: ${a}/src/L10N-TextDomain/0.00_00/textdomain/lib/RdKw/L10N/TextDomain.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..GenGenLib.pod: ${a}/src/WwW-GenGenLib/0.01_00/gengenlib/lib/RdKw/WwW/GenGenLib.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..GenGenLib..Manifest.pod: ${a}/src/WwW-GenGenLib/0.01_00/gengenlib/lib/RdKw/WwW/GenGenLib/Manifest.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..GenGenLib..Template..Provider.pod: ${a}/src/WwW-GenGenLib-Template-Provider/0.00_00/template-provider/lib/RdKw/WwW/GenGenLib/Template/Provider.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..GenLib.pod: ${a}/src/WwW-GenLib/0.03_00/genlib/lib/RdKw/WwW/GenLib.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..SiteConf.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm \
+		${A}/patch/man/3/RdKw..WwW..SiteConf.pod.patch ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<} patch/man/3/RdKw..WwW..SiteConf.pod.patch
+${c}/man/3/RdKw..WwW..SiteConf..Configure.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Configure.pod ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..SiteConf..GMake.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/GMake.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..SiteConf..Make.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Make.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..SiteConf..Modifiers.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Modifiers.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..SiteConf..Ninja.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Ninja.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/RdKw..WwW..SiteConf..L10N.pod: ${a}/src/WwW-SiteConf-L10N/0.00_00/siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+
+#
+# what every page is called, and where its anchors are (for links:
+# so a page is made again when one that it links to changes)
+#
+${c}/xref.json: ${a}/ ${A}/mkman \
+	${B}/${c}/man/1/siteconf.pod \
+	${B}/${c}/man/3/RdKw..I18N..CodeSets.pod \
+	${B}/${c}/man/3/RdKw..I18N..CodeSets..Functions.pod \
+	${B}/${c}/man/3/RdKw..L10N..TextDomain.pod \
+	${B}/${c}/man/3/RdKw..WwW..GenGenLib.pod \
+	${B}/${c}/man/3/RdKw..WwW..GenGenLib..Manifest.pod \
+	${B}/${c}/man/3/RdKw..WwW..GenGenLib..Template..Provider.pod \
+	${B}/${c}/man/3/RdKw..WwW..GenLib.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf..Configure.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf..GMake.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf..Make.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf..Modifiers.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf..Ninja.pod \
+	${B}/${c}/man/3/RdKw..WwW..SiteConf..L10N.pod
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} xref
+
+#
+# the pages
+#
+man/1/siteconf.html \
+man/3/RdKw..I18N..CodeSets.html \
+man/3/RdKw..I18N..CodeSets..Functions.html \
+man/3/RdKw..L10N..TextDomain.html \
+man/3/RdKw..WwW..GenGenLib.html \
+man/3/RdKw..WwW..GenGenLib..Manifest.html \
+man/3/RdKw..WwW..GenGenLib..Template..Provider.html \
+man/3/RdKw..WwW..GenLib.html \
+man/3/RdKw..WwW..SiteConf.html \
+man/3/RdKw..WwW..SiteConf..Configure.html \
+man/3/RdKw..WwW..SiteConf..GMake.html \
+man/3/RdKw..WwW..SiteConf..Make.html \
+man/3/RdKw..WwW..SiteConf..Modifiers.html \
+man/3/RdKw..WwW..SiteConf..Ninja.html \
+man/3/RdKw..WwW..SiteConf..L10N.html \
+	: ${a}/ ${B}/${c}/${@:R}.pod ${B}/${c}/xref.json ${B}/${b}/assets/man.css ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} page ${@}
+
+#
+# the manual pages themselves, for man(1): a module's as both .3pm
+# and .3 (the same file), as the README promised
+#
+man/1/siteconf.1 \
+man/3/RdKw..I18N..CodeSets.3pm man/3/RdKw..I18N..CodeSets.3 \
+man/3/RdKw..I18N..CodeSets..Functions.3pm man/3/RdKw..I18N..CodeSets..Functions.3 \
+man/3/RdKw..L10N..TextDomain.3pm man/3/RdKw..L10N..TextDomain.3 \
+man/3/RdKw..WwW..GenGenLib.3pm man/3/RdKw..WwW..GenGenLib.3 \
+man/3/RdKw..WwW..GenGenLib..Manifest.3pm man/3/RdKw..WwW..GenGenLib..Manifest.3 \
+man/3/RdKw..WwW..GenGenLib..Template..Provider.3pm man/3/RdKw..WwW..GenGenLib..Template..Provider.3 \
+man/3/RdKw..WwW..GenLib.3pm man/3/RdKw..WwW..GenLib.3 \
+man/3/RdKw..WwW..SiteConf.3pm man/3/RdKw..WwW..SiteConf.3 \
+man/3/RdKw..WwW..SiteConf..Configure.3pm man/3/RdKw..WwW..SiteConf..Configure.3 \
+man/3/RdKw..WwW..SiteConf..GMake.3pm man/3/RdKw..WwW..SiteConf..GMake.3 \
+man/3/RdKw..WwW..SiteConf..Make.3pm man/3/RdKw..WwW..SiteConf..Make.3 \
+man/3/RdKw..WwW..SiteConf..Modifiers.3pm man/3/RdKw..WwW..SiteConf..Modifiers.3 \
+man/3/RdKw..WwW..SiteConf..Ninja.3pm man/3/RdKw..WwW..SiteConf..Ninja.3 \
+man/3/RdKw..WwW..SiteConf..L10N.3pm man/3/RdKw..WwW..SiteConf..L10N.3 \
+	: ${a}/ ${B}/${c}/${@:R}.pod ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} nroff ${@}
+
+#
+# the pages that list pages
+#
+index.html \
+man/index.html \
+man/1/index.html \
+man/3/index.html \
+dist/I18N-CodeSets/index.html \
+dist/L10N-TextDomain/index.html \
+dist/WwW-GenGenLib/index.html \
+dist/WwW-GenGenLib-Template-Provider/index.html \
+dist/WwW-GenLib/index.html \
+dist/WwW-SiteConf/index.html \
+dist/WwW-SiteConf-L10N/index.html \
+	: ${a}/ ${B}/${c}/xref.json ${B}/${b}/assets/man.css ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} index ${@}
+
+#
+# as they are
+#
+assets/man.css robots.txt:
+	cd -- ${A:Q} && cp -- ${a}/${<} ${B:Q}/${b}/${@}

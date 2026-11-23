@@ -6,3 +6,109 @@ for List::BisectSearch(3pm) at:
     https://man.rapidcow.org/man/3/List::BisectSearch (for HTML)
     https://man.rapidcow.org/man/3/List::BisectSearch.3   (for nroff)
     https://man.rapidcow.org/man/3/List::BisectSearch.3pm (ditto)
+
+
+WHAT IS HERE
+
+    catalog       what is published: releases (a tag of a Git
+                  repository) and pages (NAME(SECTION) from a file
+                  of a release)
+    src/          the files of those pages, as ./snapshot took them
+                  from the tags; src/DIST/VERSION/RELEASE says which
+                  commit that was, and when
+    patch/        local fixes to them (see below)
+    skel/         the templates (Template Toolkit) of the pages
+    assets/       the style sheet
+    Makefile.in   the rules, MANIFEST the goal (siteconf)
+    mkman         makes the pages: POD to HTML and nroff, links
+                  between them, and the pages that list them
+    finish        names the pages back (see URIs)
+    checklinks    sees that every link in the site goes somewhere
+    view          serves docs/ the way GitHub Pages does
+    snapshot      copies what catalog says from the repository
+
+
+BUILDING
+
+    ./configure -Db=docs
+    siteconf -gA
+    make
+    ./finish docs        # or -p, to publish (as CI does)
+    ./checklinks docs
+    ./view               # http://localhost:8080/
+
+You need siteconf (see .github/workflows/pages.yml for what), and
+Template Toolkit; the rest (Pod::Simple, Pod::Man, JSON::PP) is core.
+mkman fails the build when an L<> to one of our pages (or a section
+of one) goes nowhere: that is how a broken cross-reference is caught.
+
+render, which `siteconf -i -P web' wrote, is not used (yet): every
+page is generated from data, by mkman.  ./upgrade still keeps it.
+
+
+URIS
+
+    /                                   home
+    /man/                               every page
+    /man/3/                             one section
+    /man/3/RdKw::WwW::GenLib            a page (.html)
+    /man/3/RdKw::WwW::GenLib.3pm        the same, for man(1) (and .3)
+    /man/1/siteconf                     (and siteconf.1)
+    /dist/WwW-GenLib/                   a distribution: its releases,
+                                        and the pages of the newest
+
+/man/ is always the newest release of each dist.  An older release,
+once there is one, goes under its dist, the same way down:
+
+    /dist/WwW-GenLib/0.02_03/                      (reserved)
+    /dist/WwW-GenLib/0.02_03/man/3/RdKw::WwW::GenLib
+
+(mkman already makes the stem of an older page that way.  Not done
+yet: xref.json only has the newest pages, so links from an older
+page go to the newest ones; and there are no rules for them, nor
+pages that list them.)  Should there ever be other languages, they would be a
+prefix on top of all this (/zh/man/3/...): English, which has none,
+is the default.
+
+siteconf will not make a file with a colon in its name (_check_file),
+so the page of RdKw::WwW::GenLib is made as RdKw..WwW..GenLib.html;
+./finish names it back.  Every link is written with the final name,
+so the site works only after ./finish.  Links have no .html at the
+end (GitHub Pages finds them), unless site_url is not http(s).
+
+
+ADDING A PAGE OR A RELEASE
+
+ 1. catalog: a `release' line (for a new tag), `page' lines.
+ 2. ./snapshot (or ./snapshot DIST), and commit src/.
+ 3. mkman: a NEED line for the new src/DIST/VERSION/RELEASE.
+ 4. Makefile.in: a rule for the cache (${c}/man/S/NAME.pod), and the
+    page in the lists of xref.json, of the HTML pages, of the nroff
+    pages; dist/DIST/index.html for a new dist.  MANIFEST: the same.
+
+A newer release of a dist replaces the older one in /man/: change
+VERSION in its page lines (and the paths in Makefile.in) to the new
+one, keeping the older release line (for the list of releases).
+
+
+PATCHING A PAGE
+
+What is in src/ is as it was released; a fix goes in a patch, which
+is applied to the copy in the cache (.cache/man/S/NAME.pod):
+
+    patch/man/3/RdKw..WwW..SiteConf.pod.patch
+
+Make it against the file in src/ (diff -u), and begin it with a
+header that names it, and says why:
+
+    # HAVE: patch/man/3/RdKw..WwW..SiteConf.pod.patch
+    (why, in a few lines)
+    --- a/src/...
+    +++ b/src/...
+
+(The header is not only for us: siteconf reads the first lines of a
+prerequisite for one, and finds the POD's own `# HAVE:' examples in
+a diff that has none.)  Then make it a prerequisite of that cache
+rule in Makefile.in, and pass it to mkman prep, as is done for
+RdKw::WwW::SiteConf.  mkman refuses to build a page whose patch is
+not a prerequisite, and the page says that it is patched.
