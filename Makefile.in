@@ -1,6 +1,6 @@
 #
 # Transformation rules: from ${a}/% (which is `.', the whole tree) to
-# ${b}/% (docs/), by way of ${c}/% (.cache/) for the manual pages.
+# ${b}/% (docs/), by way of ${c}/% (cache/) for the manual pages.
 #
 # A manual page is made in three steps:
 #

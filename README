@@ -16,7 +16,7 @@ WHAT IS HERE
     src/          the files of those pages, as ./snapshot took them
                   from the tags; src/DIST/VERSION/RELEASE says which
                   commit that was, and when
-    patch/        local fixes to them (see below)
+    patch/        local fixes to them, if any (see below; none now)
     skel/         the templates (Template Toolkit) of the pages
     assets/       the style sheet
     Makefile.in   the rules, MANIFEST the goal (siteconf)
@@ -107,14 +107,14 @@ one, keeping the older release line (for the list of releases).
 PATCHING A PAGE
 
 What is in src/ is as it was released; a fix goes in a patch, which
-is applied to the copy in the cache (.cache/man/S/NAME.pod):
+is applied to the copy in the cache (cache/man/S/NAME.pod):
 
-    patch/man/3/RdKw::WwW::SiteConf.pod.patch
+    patch/man/S/NAME.pod.patch
 
 Make it against the file in src/ (diff -u), and begin it with a
 header that names it, and says why:
 
-    # HAVE: patch/man/3/RdKw${U+003A}${U+003A}WwW${U+003A}${U+003A}SiteConf.pod.patch
+    # HAVE: patch/man/3/RdKw${U+003A}${U+003A}WwW${U+003A}${U+003A}GenLib.pod.patch
     (why, in a few lines)
     --- a/src/...
     +++ b/src/...
@@ -122,6 +122,14 @@ header that names it, and says why:
 (The header is not only for us: siteconf reads the first lines of a
 prerequisite for one, and finds the POD's own `# HAVE:' examples in
 a diff that has none.)  Then make it a prerequisite of that cache
-rule in Makefile.in, and pass it to mkman prep, as is done for
-RdKw::WwW::SiteConf.  mkman refuses to build a page whose patch is
-not a prerequisite, and the page says that it is patched.
+rule in Makefile.in (after the source), and pass it to mkman prep:
+
+    ${c}/man/3/${"RdKw::WwW::GenLib"}.pod: ${a}/src/.../GenLib.pm \
+    		${A}/patch/man/3/${"RdKw::WwW::GenLib"}.pod.patch ${A}/mkman
+    	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<} \
+    		patch/man/3/${"RdKw::WwW::GenLib"}.pod.patch
+
+mkman refuses to build a page whose patch is not a prerequisite, and
+the page says that it is patched.  Once the fix is in a release, the
+patch no longer applies (patch(1) takes it for one already applied):
+delete it, and take it out of the rule.
