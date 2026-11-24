@@ -92,7 +92,8 @@ the end (GitHub Pages finds them), unless site_url is not http(s).
 ADDING A PAGE OR A RELEASE
 
  1. catalog: a `release' line (for a new tag), `page' lines.
- 2. ./snapshot (or ./snapshot DIST), and commit src/.
+ 2. ./snapshot (or ./snapshot DIST); commit src/*/*/RELEASE (the
+    rest is ignored: CI runs ./snapshot itself).
  3. mkman: a NEED line for the new src/DIST/VERSION/RELEASE.
  4. Makefile.in: a rule for the cache (${c}/man/S/NAME.pod), and the
     page in the lists of xref.json, of the HTML pages, of the nroff

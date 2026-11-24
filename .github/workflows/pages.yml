@@ -84,6 +84,15 @@ jobs:
           echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
           echo "$prefix/bin" >> "$GITHUB_PATH"
 
+      # The pages themselves, from the tags that catalog names (src/
+      # has only their RELEASE files in Git).  Blobs are fetched as
+      # snapshot asks for them.
+      - name: Snapshot
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout \
+            "$SITECONF_URL" "$RUNNER_TEMP/snapshot"
+          ./snapshot -r "$RUNNER_TEMP/snapshot"
+
       # GNU Make, for the `::' in the names of the pages (POSIX make
       # cannot have them).  Then the .ok markers that siteconf leaves
       # in every directory go, and every link must go somewhere.

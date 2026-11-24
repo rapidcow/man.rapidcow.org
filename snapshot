@@ -14,10 +14,11 @@
 #   date     2026-11-20T...        (committer date, ISO 8601)
 #   repo     https://github.com/rapidcow/siteconf
 #
-# The build reads these, not the repository: so CI needs no clone,
-# and a release, once taken, is what it is (tags may move; the commit
-# says which one this was).  Run this after adding a release or page
-# to catalog, and commit what it writes.
+# The build reads these, not the repository.  Only the RELEASE files
+# are committed (src/.gitignore): CI runs this too, from the tags as
+# they are then, so a moved tag is published as it now is, and the
+# RELEASE files say which commit that was.  Run this after adding a
+# release or page to catalog, or moving a tag.
 #
 # The repository is ../../project/siteconf (from here) by default,
 # or SNAPSHOT_REPO, or -r.
