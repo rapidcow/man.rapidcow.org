@@ -5,6 +5,10 @@
 #   ./checksum       write archive/sha256sum.txt
 #   ./checksum -c    compare against it instead (as the CI does)
 #
+# It works in the build directory it is run in (where MY/ and docs/
+# are), which is the source tree for an in-tree build; ./rechecksum
+# runs it in a fresh one.
+#
 # The first line of archive/sha256sum.txt is the SHA-256 of a tarball
 # (which is never kept: it goes straight into the hash) of the files
 # that site-det lists in MY/MANIFEST, as docs/..., in the order of
@@ -31,7 +35,6 @@ tarball=site-det.gnu.tar
 sums=archive/sha256sum.txt
 
 check=
-cd "$(dirname "$0")" || exit
 while getopts ch o
 do
 	case ${o} in

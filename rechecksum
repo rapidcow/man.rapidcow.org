@@ -1,0 +1,82 @@
+#!/bin/sh
+#
+# rechecksum -- ./checksum, but of a build made from nothing.
+#
+#   ./rechecksum       write archive/sha256sum.txt
+#   ./rechecksum -c    compare against it instead
+#
+# The build is made out of tree, in a temporary directory that is
+# removed after:
+#
+#   MY/config.mk is ours (so the same ${a}, ${R}, ${F}...), but not
+#   MY/option.mk, so the options are configure's defaults again;
+#   then ./configure -DA=here -DB=there -Db=docs -Dc=cache (docs/
+#   is what ./checksum hashes, by name, so it must not move),
+#   siteconf -g -G redo with site-det a goal of its own, and redo
+#   all there.  ./checksum then runs in that directory, and what it
+#   wrote is copied back here (or, with -c, ours is copied there
+#   first, to compare against).
+#
+# What is built is what is here (src/ as ./snapshot left it, and
+# whatever is not committed), not what is in Git.  You need siteconf,
+# redo, and what ./checksum needs.
+#
+sums=archive/sha256sum.txt
+
+check=
+cd "$(dirname "$0")" || exit
+while getopts ch o
+do
+	case ${o} in
+	c)
+		check=-c
+		;;
+	h)
+		echo "usage: $0 [-c]"
+		exit 0
+		;;
+	?)
+		exit 2
+		;;
+	esac
+done
+shift $(( OPTIND - 1 ))
+[ $# -eq 0 ] || { echo "usage: $0 [-c]" >&2; exit 2; }
+
+die()
+{
+	echo "$0: $*" >&2
+	exit 2
+}
+
+here=$(pwd -P) || exit 2
+[ -f MY/config.mk ] || die "MY/config.mk: not there; run ./configure first"
+[ -z "${check}" ] || [ -f "${sums}" ] || die "${sums}: not there (run $0 and commit it)"
+
+umask 022
+dir=$(mktemp -d) || exit 2
+trap 'rm -rf "${dir}"' EXIT
+trap 'exit 2' HUP INT TERM
+dir=$(cd "${dir}" && pwd -P) || exit 2
+
+mkdir "${dir}/MY" &&
+cp MY/config.mk "${dir}/MY/config.mk" || exit 2
+
+./configure -q -DA="${here}" -DB="${dir}" \
+	-Db=docs -Dc=cache || die "./configure failed"
+siteconf -q -g -B "${dir}" -G redo -t ,site -t site-det ||
+	die "siteconf -g failed"
+(cd "${dir}" && redo all) || die "redo all failed"
+
+if [ -n "${check}" ]
+then
+	mkdir -p "${dir}/$(dirname "${sums}")" &&
+	cp "${sums}" "${dir}/${sums}" || exit 2
+fi
+(cd "${dir}" && "${here}/checksum" ${check})
+status=$?
+[ -z "${check}" ] && [ ${status} -eq 0 ] || exit ${status}
+
+mkdir -p "$(dirname "${sums}")" &&
+cp "${dir}/${sums}" "${sums}" || exit 2
+echo "Wrote ${sums}"
