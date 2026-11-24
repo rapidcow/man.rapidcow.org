@@ -99,10 +99,11 @@ jobs:
       - name: Build
         run: |
           ./configure -Db=docs
-          siteconf -gA -G gmake
+          siteconf -gA -G gmake -t , -t site-det
           make site
           find docs -name .ok -type f -delete
           ./checklinks docs
+          ./checksum -c
 
       - uses: actions/upload-pages-artifact@v3
         with:
