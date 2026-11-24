@@ -43,9 +43,8 @@ ${c}/man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.pod: ${a}/src/WwW-GenGe
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
 ${c}/man/3/${"RdKw::WwW::GenLib"}.pod: ${a}/src/WwW-GenLib/0.03_00/genlib/lib/RdKw/WwW/GenLib.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/${"RdKw::WwW::SiteConf"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm \
-		${A}/patch/man/3/${"RdKw::WwW::SiteConf"}.pod.patch ${A}/mkman
-	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<} patch/man/3/${"RdKw::WwW::SiteConf"}.pod.patch
+${c}/man/3/${"RdKw::WwW::SiteConf"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
 ${c}/man/3/${"RdKw::WwW::SiteConf::Configure"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Configure.pod ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
 ${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Backend/Bmake.pm ${A}/mkman
