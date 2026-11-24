@@ -35,7 +35,7 @@
 [% content %]
 </main>
 <footer class="sitefoot">
-	<p>Hosted by ??? &middot; Designed by Claude Code &middot; <a href="https://github.com/rapidcow/man.rapidcow.org.git">Source code</a></p>
+	<p>Hosted by ??? &middot; Designed by Claude Code &middot; <a href="https://github.com/rapidcow/man.rapidcow.org">Source code</a></p>
 </footer>
 </body>
 </html>
