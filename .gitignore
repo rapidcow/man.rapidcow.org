@@ -9,6 +9,7 @@
 
 # what ./configure, siteconf -g and make write
 .cache/
+cache/
 MY/
 Makefile
 build.ninja
@@ -16,5 +17,5 @@ build.ninja
 docs/
 
 # what siteconf -G redo writes, and redo (if no .redo/ above us)
-/all.do
+*.do
 .redo/

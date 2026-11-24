@@ -2,7 +2,7 @@
 #
 # configure -- written by `siteconf -i' version 0.03_00.
 #
-# options: -P web -Sa=. -Sb=docs -Sc=.cache '-Dclean=clean-&' -Osite_url=https://man.rapidcow.org -MRdKw::WwW::GenGenLib::Template::Provider
+# options: -P web -Sa=. -Sb=docs -Sc=cache -Osite_url=https://man.rapidcow.org -MRdKw::WwW::GenGenLib::Template::Provider
 #
 
 use utf8;
@@ -133,8 +133,7 @@ our %Dd = (
 	R => "Makefile.in",
 	a => ".",
 	b => "docs",
-	c => ".cache",
-	clean => "clean-&",
+	c => "cache",
 	e => ".ok",
 );
 our %Od = (
@@ -153,7 +152,6 @@ our @VARHELP = (
 	[ '-DR', N__('Transformation rules, from current directory'), sub { $Dd{R} } ],
 	[ '-DF', N__('Manifest, from current directory'), sub { $Dd{F} } ],
 	[ '-De', N__('Directory marker'), sub { $Dd{e} } ],
-	[ "-Dclean", "", sub { $Dd{clean} } ],
 );
 our @OPTHELP = (
 	[ "-Osite_url", N__("Absolute base URL"), sub { $Od{site_url} } ],

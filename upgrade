@@ -30,7 +30,7 @@ files="configure render"
 # header of ./configure.
 siteconf_opts() {
 	"${SITECONF:-siteconf}" -i -f -q \
-		-P web -Sa=. -Sb=docs -Sc=.cache '-Dclean=clean-&' \
+		-P web -Sa=. -Sb=docs -Sc=cache \
 		-Osite_url=https://man.rapidcow.org \
 		-MRdKw::WwW::GenGenLib::Template::Provider \
 		"$@"
