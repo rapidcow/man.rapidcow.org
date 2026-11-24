@@ -19,3 +19,9 @@ docs/
 # what siteconf -G redo writes, and redo (if no .redo/ above us)
 *.do
 .redo/
+
+# JdeBP's redo insists on creating these...
+# so let's just ignore all of them.
+all
+clean
+purge
