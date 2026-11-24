@@ -43,7 +43,7 @@ next to every target, in docs/ too: delete them (find docs -name
 -g again before the next redo.
 
 The rules are not tied to redo: siteconf -gA -G gmake and then
-`gmake docs' (GNU Make 4; not macOS's make, which is 3.81) builds
+`gmake site' (GNU Make 4; not macOS's make, which is 3.81) builds
 the same site, as CI does; it leaves .ok markers in every directory
 instead, which are to be deleted the same way.
 
