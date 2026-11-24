@@ -2,13 +2,12 @@
 #
 # checklinks -- see that every link in the site goes somewhere
 #
-#   ./checklinks [dir]        (docs by default; after ./finish)
+#   ./checklinks [dir]        (docs by default)
 #
 # Every relative href and src in every HTML file must name a file
 # there, as a web server like GitHub Pages finds it (PATH, PATH.html,
 # or PATH/index.html), and its #fragment an id in that file.  Links
-# with a scheme (https:, mailto:) are not followed.  The names with
-# `..' that ./finish leaves (without -p) are not checked themselves.
+# with a scheme (https:, mailto:) are not followed.
 #
 use 5.010;
 use strict;
@@ -23,7 +22,6 @@ my (@html, %ids);
 find({ no_chdir => 1, wanted => sub {
 	return unless -f && /\.html\z/;
 	(my $rel = $File::Find::name) =~ s{\A\Q$dir\E/}{};
-	return if $rel =~ m{(?:\A|/)[^/]*\.\.[^/]*\.html\z};
 	push @html, $rel;
 } }, $dir);
 

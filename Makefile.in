@@ -9,9 +9,10 @@
 #                                  applied, if there is one
 #   ${b}/man/S/NAME.html           the page; also .S (and .3pm) in nroff
 #
-# where NAME is the page's name with `::' spelled `..', since siteconf
-# does not make file names with colons in them.  ./finish names them
-# back, after the build.
+# where NAME is the page's name, colons and all, written ${"A::B"} here
+# (a bare `:' would end the targets, with any generator).  That takes
+# redo (siteconf -G redo), or GNU Make or Ninja: POSIX make cannot name
+# such a file.
 #
 # To add a page: a `page' line in catalog, ./snapshot, then here a
 # rule for the cache, the page in the lists of xref.json, of the
@@ -28,34 +29,40 @@
 #
 ${c}/man/1/siteconf.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/script/siteconf ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..I18N..CodeSets.pod: ${a}/src/I18N-CodeSets/0.00_00/codesets/lib/RdKw/I18N/CodeSets.pm ${A}/mkman
+${c}/man/3/${"RdKw::I18N::CodeSets"}.pod: ${a}/src/I18N-CodeSets/0.00_00/codesets/lib/RdKw/I18N/CodeSets.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..I18N..CodeSets..Functions.pod: ${a}/src/I18N-CodeSets/0.00_00/codesets/lib/RdKw/I18N/CodeSets/Functions.pm ${A}/mkman
+${c}/man/3/${"RdKw::I18N::CodeSets::Functions"}.pod: ${a}/src/I18N-CodeSets/0.00_00/codesets/lib/RdKw/I18N/CodeSets/Functions.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..L10N..TextDomain.pod: ${a}/src/L10N-TextDomain/0.00_00/textdomain/lib/RdKw/L10N/TextDomain.pm ${A}/mkman
+${c}/man/3/${"RdKw::L10N::TextDomain"}.pod: ${a}/src/L10N-TextDomain/0.00_00/textdomain/lib/RdKw/L10N/TextDomain.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..GenGenLib.pod: ${a}/src/WwW-GenGenLib/0.01_00/gengenlib/lib/RdKw/WwW/GenGenLib.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::GenGenLib"}.pod: ${a}/src/WwW-GenGenLib/0.01_00/gengenlib/lib/RdKw/WwW/GenGenLib.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..GenGenLib..Manifest.pod: ${a}/src/WwW-GenGenLib/0.01_00/gengenlib/lib/RdKw/WwW/GenGenLib/Manifest.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::GenGenLib::Manifest"}.pod: ${a}/src/WwW-GenGenLib/0.01_00/gengenlib/lib/RdKw/WwW/GenGenLib/Manifest.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..GenGenLib..Template..Provider.pod: ${a}/src/WwW-GenGenLib-Template-Provider/0.00_00/template-provider/lib/RdKw/WwW/GenGenLib/Template/Provider.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.pod: ${a}/src/WwW-GenGenLib-Template-Provider/0.00_00/template-provider/lib/RdKw/WwW/GenGenLib/Template/Provider.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..GenLib.pod: ${a}/src/WwW-GenLib/0.03_00/genlib/lib/RdKw/WwW/GenLib.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::GenLib"}.pod: ${a}/src/WwW-GenLib/0.03_00/genlib/lib/RdKw/WwW/GenLib.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..SiteConf.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm \
-		${A}/patch/man/3/RdKw..WwW..SiteConf.pod.patch ${A}/mkman
-	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<} patch/man/3/RdKw..WwW..SiteConf.pod.patch
-${c}/man/3/RdKw..WwW..SiteConf..Configure.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Configure.pod ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm \
+		${A}/patch/man/3/${"RdKw::WwW::SiteConf"}.pod.patch ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<} patch/man/3/${"RdKw::WwW::SiteConf"}.pod.patch
+${c}/man/3/${"RdKw::WwW::SiteConf::Configure"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Configure.pod ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..SiteConf..GMake.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/GMake.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Backend/Bmake.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..SiteConf..Make.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Make.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Backend/Gmake.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..SiteConf..Modifiers.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Modifiers.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Backend/Make.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..SiteConf..Ninja.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Ninja.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.pod: ${a}/src/WwW-SiteConf-Ninja/0.03_00/siteconf-ninja/lib/RdKw/WwW/SiteConf/Backend/Ninja.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/RdKw..WwW..SiteConf..L10N.pod: ${a}/src/WwW-SiteConf-L10N/0.00_00/siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.pod: ${a}/src/WwW-SiteConf-Redo/0.03_00/siteconf-redo/lib/RdKw/WwW/SiteConf/Backend/Redo.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.pod: ${a}/src/WwW-SiteConf-Doit/0.03_00/siteconf-doit/lib/RdKw/WwW/SiteConf/Backend/Doit.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/${"RdKw::WwW::SiteConf::Modifiers"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Modifiers.pm ${A}/mkman
+	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
+${c}/man/3/${"RdKw::WwW::SiteConf::L10N"}.pod: ${a}/src/WwW-SiteConf-L10N/0.00_00/siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
 
 #
@@ -64,40 +71,46 @@ ${c}/man/3/RdKw..WwW..SiteConf..L10N.pod: ${a}/src/WwW-SiteConf-L10N/0.00_00/sit
 #
 ${c}/xref.json: ${a}/ ${A}/mkman \
 	${B}/${c}/man/1/siteconf.pod \
-	${B}/${c}/man/3/RdKw..I18N..CodeSets.pod \
-	${B}/${c}/man/3/RdKw..I18N..CodeSets..Functions.pod \
-	${B}/${c}/man/3/RdKw..L10N..TextDomain.pod \
-	${B}/${c}/man/3/RdKw..WwW..GenGenLib.pod \
-	${B}/${c}/man/3/RdKw..WwW..GenGenLib..Manifest.pod \
-	${B}/${c}/man/3/RdKw..WwW..GenGenLib..Template..Provider.pod \
-	${B}/${c}/man/3/RdKw..WwW..GenLib.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf..Configure.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf..GMake.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf..Make.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf..Modifiers.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf..Ninja.pod \
-	${B}/${c}/man/3/RdKw..WwW..SiteConf..L10N.pod
+	${B}/${c}/man/3/${"RdKw::I18N::CodeSets"}.pod \
+	${B}/${c}/man/3/${"RdKw::I18N::CodeSets::Functions"}.pod \
+	${B}/${c}/man/3/${"RdKw::L10N::TextDomain"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::GenGenLib"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::GenGenLib::Manifest"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::GenLib"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Configure"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Modifiers"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.pod \
+	${B}/${c}/man/3/${"RdKw::WwW::SiteConf::L10N"}.pod
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} xref
 
 #
 # the pages
 #
 man/1/siteconf.html \
-man/3/RdKw..I18N..CodeSets.html \
-man/3/RdKw..I18N..CodeSets..Functions.html \
-man/3/RdKw..L10N..TextDomain.html \
-man/3/RdKw..WwW..GenGenLib.html \
-man/3/RdKw..WwW..GenGenLib..Manifest.html \
-man/3/RdKw..WwW..GenGenLib..Template..Provider.html \
-man/3/RdKw..WwW..GenLib.html \
-man/3/RdKw..WwW..SiteConf.html \
-man/3/RdKw..WwW..SiteConf..Configure.html \
-man/3/RdKw..WwW..SiteConf..GMake.html \
-man/3/RdKw..WwW..SiteConf..Make.html \
-man/3/RdKw..WwW..SiteConf..Modifiers.html \
-man/3/RdKw..WwW..SiteConf..Ninja.html \
-man/3/RdKw..WwW..SiteConf..L10N.html \
+man/3/${"RdKw::I18N::CodeSets"}.html \
+man/3/${"RdKw::I18N::CodeSets::Functions"}.html \
+man/3/${"RdKw::L10N::TextDomain"}.html \
+man/3/${"RdKw::WwW::GenGenLib"}.html \
+man/3/${"RdKw::WwW::GenGenLib::Manifest"}.html \
+man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.html \
+man/3/${"RdKw::WwW::GenLib"}.html \
+man/3/${"RdKw::WwW::SiteConf"}.html \
+man/3/${"RdKw::WwW::SiteConf::Configure"}.html \
+man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.html \
+man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.html \
+man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.html \
+man/3/${"RdKw::WwW::SiteConf::Modifiers"}.html \
+man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.html \
+man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.html \
+man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.html \
+man/3/${"RdKw::WwW::SiteConf::L10N"}.html \
 	: ${a}/ ${B}/${c}/${@:R}.pod ${B}/${c}/xref.json ${B}/${b}/assets/man.css ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} page ${@}
 
@@ -106,20 +119,23 @@ man/3/RdKw..WwW..SiteConf..L10N.html \
 # and .3 (the same file), as the README promised
 #
 man/1/siteconf.1 \
-man/3/RdKw..I18N..CodeSets.3pm man/3/RdKw..I18N..CodeSets.3 \
-man/3/RdKw..I18N..CodeSets..Functions.3pm man/3/RdKw..I18N..CodeSets..Functions.3 \
-man/3/RdKw..L10N..TextDomain.3pm man/3/RdKw..L10N..TextDomain.3 \
-man/3/RdKw..WwW..GenGenLib.3pm man/3/RdKw..WwW..GenGenLib.3 \
-man/3/RdKw..WwW..GenGenLib..Manifest.3pm man/3/RdKw..WwW..GenGenLib..Manifest.3 \
-man/3/RdKw..WwW..GenGenLib..Template..Provider.3pm man/3/RdKw..WwW..GenGenLib..Template..Provider.3 \
-man/3/RdKw..WwW..GenLib.3pm man/3/RdKw..WwW..GenLib.3 \
-man/3/RdKw..WwW..SiteConf.3pm man/3/RdKw..WwW..SiteConf.3 \
-man/3/RdKw..WwW..SiteConf..Configure.3pm man/3/RdKw..WwW..SiteConf..Configure.3 \
-man/3/RdKw..WwW..SiteConf..GMake.3pm man/3/RdKw..WwW..SiteConf..GMake.3 \
-man/3/RdKw..WwW..SiteConf..Make.3pm man/3/RdKw..WwW..SiteConf..Make.3 \
-man/3/RdKw..WwW..SiteConf..Modifiers.3pm man/3/RdKw..WwW..SiteConf..Modifiers.3 \
-man/3/RdKw..WwW..SiteConf..Ninja.3pm man/3/RdKw..WwW..SiteConf..Ninja.3 \
-man/3/RdKw..WwW..SiteConf..L10N.3pm man/3/RdKw..WwW..SiteConf..L10N.3 \
+man/3/${"RdKw::I18N::CodeSets"}.3pm man/3/${"RdKw::I18N::CodeSets"}.3 \
+man/3/${"RdKw::I18N::CodeSets::Functions"}.3pm man/3/${"RdKw::I18N::CodeSets::Functions"}.3 \
+man/3/${"RdKw::L10N::TextDomain"}.3pm man/3/${"RdKw::L10N::TextDomain"}.3 \
+man/3/${"RdKw::WwW::GenGenLib"}.3pm man/3/${"RdKw::WwW::GenGenLib"}.3 \
+man/3/${"RdKw::WwW::GenGenLib::Manifest"}.3pm man/3/${"RdKw::WwW::GenGenLib::Manifest"}.3 \
+man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.3pm man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.3 \
+man/3/${"RdKw::WwW::GenLib"}.3pm man/3/${"RdKw::WwW::GenLib"}.3 \
+man/3/${"RdKw::WwW::SiteConf"}.3pm man/3/${"RdKw::WwW::SiteConf"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Configure"}.3pm man/3/${"RdKw::WwW::SiteConf::Configure"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.3pm man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.3pm man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.3pm man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Modifiers"}.3pm man/3/${"RdKw::WwW::SiteConf::Modifiers"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.3pm man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.3pm man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.3 \
+man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.3pm man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.3 \
+man/3/${"RdKw::WwW::SiteConf::L10N"}.3pm man/3/${"RdKw::WwW::SiteConf::L10N"}.3 \
 	: ${a}/ ${B}/${c}/${@:R}.pod ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} nroff ${@}
 
@@ -137,6 +153,9 @@ dist/WwW-GenGenLib-Template-Provider/index.html \
 dist/WwW-GenLib/index.html \
 dist/WwW-SiteConf/index.html \
 dist/WwW-SiteConf-L10N/index.html \
+dist/WwW-SiteConf-Ninja/index.html \
+dist/WwW-SiteConf-Redo/index.html \
+dist/WwW-SiteConf-Doit/index.html \
 	: ${a}/ ${B}/${c}/xref.json ${B}/${b}/assets/man.css ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} index ${@}
 

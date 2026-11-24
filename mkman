@@ -10,6 +10,9 @@
 # NEED: src/WwW-GenLib/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf-L10N/0.00_00/RELEASE
+# NEED: src/WwW-SiteConf-Ninja/0.03_00/RELEASE
+# NEED: src/WwW-SiteConf-Redo/0.03_00/RELEASE
+# NEED: src/WwW-SiteConf-Doit/0.03_00/RELEASE
 #
 # (Every release in catalog has a RELEASE file, which ./snapshot
 # writes; list it above when you add one, so that what is made with
@@ -36,11 +39,8 @@
 #   page   writes the HTML page; nroff, the manual page itself.
 #   index  writes the pages that list other pages.
 #
-# A file name cannot have a colon in it (siteconf will not make one),
-# so RdKw::WwW::GenLib is made as RdKw..WwW..GenLib (no Perl module
-# name has `..' in it), and ./finish names it back after the build.
-# Links are written as the finished names: the site works after
-# ./finish, not before.
+# A page is made under its own name, colons and all (siteconf allows
+# them with redo, GNU Make or Ninja): man/3/RdKw::WwW::GenLib.html.
 #
 use utf8;
 use 5.010;
@@ -145,17 +145,16 @@ my (@release, %release, @page, %latest);
 	close $fh;
 }
 
-# What a page is made as: its stem (where we make it, the name with
-# no colons), and its location (where it ends up, after ./finish).
+# What a page is made as: its stem (the target, less its suffix), and
+# its location (the HTML page, which links are made to).
 # Only the newest release of a dist is published in man/; an older
 # one would go in dist/DIST/VERSION/man/ (and is not made yet).
-sub stem_of { (my $s = $_[0]) =~ s/::/../g; $s }
 for my $p (@page) {
 	my $part = part($p->{sec});
 	my $root = $latest{$p->{dist}} == $p->{release} ? ''
 		: "dist/$p->{dist}/$p->{version}/";
 	$p->{latest} = !length $root;
-	$p->{stem} = "${root}man/$part/" . stem_of($p->{name});
+	$p->{stem} = "${root}man/$part/$p->{name}";
 	$p->{location} = "${root}man/$part/$p->{name}.html";
 	$p->{cache} = "$p->{stem}.pod";
 }

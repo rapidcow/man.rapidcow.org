@@ -23,8 +23,13 @@ env:
   # The build script, www-siteconf, comes from one repository in
   # parts: engine needs gengenlib (which needs codesets and
   # textdomain), and the web preset (configure) needs genlib and
-  # template-provider.  Each ref's first component names the
-  # directory to build.  Listed in (rough) topological order.
+  # template-provider.  Each is built from its own directory (the
+  # list in the install step names it).  Listed in (rough)
+  # topological order.
+  #
+  # The tags of gengenlib and siteconf must have 561e580 ("Accept
+  # file names with colons for gmake and ninja"): our pages are
+  # named man/3/RdKw::WwW::GenLib.html.
   #
   # (These are the tools that build the site, not the documentation
   # it publishes: that is in src/, taken by ./snapshot from the tags
@@ -65,8 +70,11 @@ jobs:
         run: |
           prefix="$RUNNER_TEMP/siteconf"
           export PERL5LIB="$prefix/lib/perl5"
-          for ref in "$CODESETS_REF" "$TEXTDOMAIN_REF" "$GENGENLIB_REF" "$GENLIB_REF" "$TEMPLATE_PROVIDER_REF" "$SITECONF_REF"; do
-            part=${ref%%/*}
+          set -- codesets "$CODESETS_REF" textdomain "$TEXTDOMAIN_REF" \
+            gengenlib "$GENGENLIB_REF" genlib "$GENLIB_REF" \
+            template-provider "$TEMPLATE_PROVIDER_REF" siteconf "$SITECONF_REF"
+          while [ $# -gt 0 ]; do
+            part=$1 ref=$2; shift 2
             git -c advice.detachedHead=false clone --quiet --depth 1 \
               --single-branch --branch "$ref" "$SITECONF_URL" "$RUNNER_TEMP/src/$part"
             (cd "$RUNNER_TEMP/src/$part/$part" &&
@@ -76,15 +84,24 @@ jobs:
           echo "PERL5LIB=$PERL5LIB" >> "$GITHUB_ENV"
           echo "$prefix/bin" >> "$GITHUB_PATH"
 
-      # ./finish -p gives the pages their names with `::' (which
-      # siteconf cannot make) and removes the .ok markers; then every
-      # link in the site must go somewhere.
+      # The pages themselves, from the tags that catalog names (src/
+      # has only their RELEASE files in Git).  Blobs are fetched as
+      # snapshot asks for them.
+      - name: Snapshot
+        run: |
+          git clone --quiet --filter=blob:none --no-checkout \
+            "$SITECONF_URL" "$RUNNER_TEMP/snapshot"
+          ./snapshot -r "$RUNNER_TEMP/snapshot"
+
+      # GNU Make, for the `::' in the names of the pages (POSIX make
+      # cannot have them).  Then the .ok markers that siteconf leaves
+      # in every directory go, and every link must go somewhere.
       - name: Build
         run: |
           ./configure -Db=docs
-          siteconf -gA
-          make
-          ./finish -p docs
+          siteconf -gA -G gmake
+          make docs
+          find docs -name .ok -type f -delete
           ./checklinks docs
 
       - uses: actions/upload-pages-artifact@v3
