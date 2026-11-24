@@ -35,12 +35,12 @@ env:
   # it publishes: that is in src/, taken by ./snapshot from the tags
   # that catalog names.)
   SITECONF_URL: https://github.com/rapidcow/siteconf.git
-  CODESETS_REF: codesets/v0.00_00
-  TEXTDOMAIN_REF: textdomain/v0.00_00
-  GENGENLIB_REF: gengenlib/v0.01_00
-  GENLIB_REF: genlib/v0.03_00
-  TEMPLATE_PROVIDER_REF: template-provider/v0.00_00
-  SITECONF_REF: siteconf/v0.03_00
+  CODESETS_REF: HEAD
+  TEXTDOMAIN_REF: HEAD
+  GENGENLIB_REF: HEAD
+  GENLIB_REF: HEAD
+  TEMPLATE_PROVIDER_REF: HEAD
+  SITECONF_REF: HEAD
 
 jobs:
   deploy:
