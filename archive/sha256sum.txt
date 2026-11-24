@@ -1,11 +1,11 @@
-282f73d8cd09c5e6b25bd63ee585c587eca1d5cdc97acb8fcf3ba54bcf9c52b1  site-det.gnu.tar
+1806faff68681c76cc93f43c8ead3317a449fac1edc64f07edaf55faf951b38e  site-det.gnu.tar
 b594848267eeb56e2b7a249705cccb30106fe976977965516ad810e2fd760f93  docs/index.html
 16ceb5ee3e0dc13aa9adf31a3ebbe45a1d965b8c2b9f72eaf84e5911e140ed95  docs/robots.txt
 24a22b4a4ac38db86eaecd9a467b0b2c292f8e701b41caf6447f19227d8b5c5b  docs/assets/man.css
 d5fe627cbafaf72074f34b297a65e8ba73137e92e91d5ac4f6f88a882c6844bf  docs/man/index.html
 0285eb0f73bce5ffcd5aa84e8dec49aa1bed020a23f0c1adac3132952baa81b7  docs/dist/I18N-CodeSets/index.html
 757a31e6839c378272bbb3c78bf92dc062772bd61e2a463870430fe67c7fc46a  docs/dist/L10N-TextDomain/index.html
-3fcfbf8c234cf77f07367013587c7bcd80ac7870f12e625a688b7868ac8ab032  docs/dist/WwW-GenGenLib/index.html
+ad95c6ae216331a081c62903636524a76f7fadefa28db232bcc4c036a640b6e8  docs/dist/WwW-GenGenLib/index.html
 a6bbb3bd46c96d425c8e51431ae91ce1c962cf0f2b561d7fabe1bc20e07d7eef  docs/dist/WwW-GenGenLib-Template-Provider/index.html
 4535b773b7f4a00d10f5d8133329370156f2bab32df1b7420126037b82b9009f  docs/dist/WwW-GenLib/index.html
 cde398e546b9b8d8c3189fc7870c18ab120fcd039cbf77486e6fb60c2b52ec1b  docs/dist/WwW-SiteConf/index.html
@@ -18,8 +18,8 @@ b4c2e31aea2284802e1d3e6cbfde2706a820b93b07392c731502358a32307879  docs/dist/WwW-
 1060cabbb23d9cb5f1c50606f43c436cc3a50cac1b804ca622c54142a8a7f22c  docs/man/3/RdKw::I18N::CodeSets.html
 5ae19f0266af36dfad4227d215b26325177596e43c08a2e29cc48fc0a3c972b8  docs/man/3/RdKw::I18N::CodeSets::Functions.html
 82d828a107d6a75fbbde024e6ac099252214fb988cae7e4fc3a4bd36e2914a48  docs/man/3/RdKw::L10N::TextDomain.html
-9a5b6e5ab1ce6fc91fd736880def9405d0250617ae801d7b07198e7e5d12f18d  docs/man/3/RdKw::WwW::GenGenLib.html
-a6b213c1998c9f8d5f900ca4c5c3a5e76f01d4b3606777a37db189fef270700c  docs/man/3/RdKw::WwW::GenGenLib::Manifest.html
+400b455c5a1b8a10fd832183dd7f92c74f0a5b0bacae6b6f4ff7b2752162b75c  docs/man/3/RdKw::WwW::GenGenLib.html
+b284ebae81b6defcace7587cc7b7978312d5c7995b09b7ed7bbdedec5db58132  docs/man/3/RdKw::WwW::GenGenLib::Manifest.html
 65695f23702caeb673a9537194d124887d23ea63b00cb9abfcc50bea7267e1c2  docs/man/3/RdKw::WwW::GenGenLib::Template::Provider.html
 1d3eea5ca6c2c828d06b2fc45238306b38fd4cc680c8ee215aef9f4eb9b8f51d  docs/man/3/RdKw::WwW::GenLib.html
 8ef2adee54d074b9c4dfaf232afcb3daeddd2c03a82cfe746a2099115d5ee279  docs/man/3/RdKw::WwW::SiteConf.html
