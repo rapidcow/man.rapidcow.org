@@ -100,7 +100,7 @@ jobs:
         run: |
           ./configure -Db=docs
           siteconf -gA -G gmake
-          make docs
+          make site
           find docs -name .ok -type f -delete
           ./checklinks docs
 
