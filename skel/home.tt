@@ -8,7 +8,7 @@
 [% WRAPPER layout.tt -%]
 <article class="listing">
 <h1>man.rapidcow.org</h1>
-<p class="lede">Welcome to <b>man</b>.rapidcow.org :]</p>
+<p class="lede">Welcome to <b>man</b>.rapidcow.org!</p>
 
 <h2>Sections</h2>
 <ul class="sectionlist">
