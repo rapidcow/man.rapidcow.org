@@ -27,9 +27,9 @@ env:
   # list in the install step names it).  Listed in (rough)
   # topological order.
   #
-  # gengenlib and siteconf come from master until there are tags
-  # with 561e580 ("Accept file names with colons for gmake and
-  # ninja"): our pages are named man/3/RdKw::WwW::GenLib.html.
+  # The tags of gengenlib and siteconf must have 561e580 ("Accept
+  # file names with colons for gmake and ninja"): our pages are
+  # named man/3/RdKw::WwW::GenLib.html.
   #
   # (These are the tools that build the site, not the documentation
   # it publishes: that is in src/, taken by ./snapshot from the tags

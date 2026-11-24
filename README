@@ -30,13 +30,23 @@ WHAT IS HERE
 BUILDING
 
     ./configure -Db=docs
-    siteconf -gA -G gmake
-    gmake docs           # make, if yours is GNU Make 4 (not macOS's 3.81)
+    siteconf -gA -G redo
+    redo                 # all.do: every page of MANIFEST
     ./checklinks docs
     ./view               # http://localhost:8080/
 
-You need siteconf with 561e580 (file names with colons; see
-.github/workflows/pages.yml), GNU Make, and Template Toolkit; the rest (Pod::Simple, Pod::Man, JSON::PP) is core.
+You need siteconf and its redo generator (WwW-SiteConf-Redo), redo
+(apenwarr's; tested with 0.42d), and Template Toolkit; the rest
+(Pod::Simple, Pod::Man, JSON::PP) is core.  redo leaves a .do file
+next to every target, in docs/ too: delete them (find docs -name
+'*.do' -delete) before you publish docs/ anywhere, and run siteconf
+-g again before the next redo.
+
+The rules are not tied to redo: siteconf -gA -G gmake and then
+`gmake docs' (GNU Make 4; not macOS's make, which is 3.81) builds
+the same site, as CI does; it leaves .ok markers in every directory
+instead, which are to be deleted the same way.
+
 mkman fails the build when an L<> to one of our pages (or a section
 of one) goes nowhere: that is how a broken cross-reference is caught.
 
@@ -69,8 +79,9 @@ prefix on top of all this (/zh/man/3/...): English, which has none,
 is the default.
 
 A page is made under its own name, man/3/RdKw::WwW::GenLib.html,
-which takes GNU Make (siteconf -G gmake; POSIX make cannot name a
-file with a colon).  In Makefile.in and MANIFEST it is written
+which takes redo, GNU Make or Ninja (POSIX make cannot name a file
+with a colon).  The rules are siteconf's whatever the generator, so
+in Makefile.in and MANIFEST the name is written
 ${"RdKw::WwW::GenLib"}, since a bare `:' would end a rule's targets;
 in a `# HAVE:' header, RdKw${U+003A}${U+003A}WwW..., since there it
 would end the name.  A link to it is written ./RdKw::WwW::GenLib, or

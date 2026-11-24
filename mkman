@@ -10,6 +10,9 @@
 # NEED: src/WwW-GenLib/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf-L10N/0.00_00/RELEASE
+# NEED: src/WwW-SiteConf-Ninja/0.03_00/RELEASE
+# NEED: src/WwW-SiteConf-Redo/0.03_00/RELEASE
+# NEED: src/WwW-SiteConf-Doit/0.03_00/RELEASE
 #
 # (Every release in catalog has a RELEASE file, which ./snapshot
 # writes; list it above when you add one, so that what is made with
@@ -37,7 +40,7 @@
 #   index  writes the pages that list other pages.
 #
 # A page is made under its own name, colons and all (siteconf allows
-# them with GNU Make or Ninja): man/3/RdKw::WwW::GenLib.html.
+# them with redo, GNU Make or Ninja): man/3/RdKw::WwW::GenLib.html.
 #
 use utf8;
 use 5.010;

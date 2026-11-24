@@ -18,6 +18,9 @@ MAKE docs
 	NEED dist/WwW-GenLib/index.html
 	NEED dist/WwW-SiteConf/index.html
 	NEED dist/WwW-SiteConf-L10N/index.html
+	NEED dist/WwW-SiteConf-Ninja/index.html
+	NEED dist/WwW-SiteConf-Redo/index.html
+	NEED dist/WwW-SiteConf-Doit/index.html
 
 	NEED man/1/siteconf.html
 	NEED man/1/siteconf.1
@@ -49,18 +52,27 @@ MAKE docs
 	NEED man/3/${"RdKw::WwW::SiteConf::Configure"}.html
 	NEED man/3/${"RdKw::WwW::SiteConf::Configure"}.3pm
 	NEED man/3/${"RdKw::WwW::SiteConf::Configure"}.3
-	NEED man/3/${"RdKw::WwW::SiteConf::GMake"}.html
-	NEED man/3/${"RdKw::WwW::SiteConf::GMake"}.3pm
-	NEED man/3/${"RdKw::WwW::SiteConf::GMake"}.3
-	NEED man/3/${"RdKw::WwW::SiteConf::Make"}.html
-	NEED man/3/${"RdKw::WwW::SiteConf::Make"}.3pm
-	NEED man/3/${"RdKw::WwW::SiteConf::Make"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Bmake"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Gmake"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Make"}.3
 	NEED man/3/${"RdKw::WwW::SiteConf::Modifiers"}.html
 	NEED man/3/${"RdKw::WwW::SiteConf::Modifiers"}.3pm
 	NEED man/3/${"RdKw::WwW::SiteConf::Modifiers"}.3
-	NEED man/3/${"RdKw::WwW::SiteConf::Ninja"}.html
-	NEED man/3/${"RdKw::WwW::SiteConf::Ninja"}.3pm
-	NEED man/3/${"RdKw::WwW::SiteConf::Ninja"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Ninja"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Redo"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.3
 	NEED man/3/${"RdKw::WwW::SiteConf::L10N"}.html
 	NEED man/3/${"RdKw::WwW::SiteConf::L10N"}.3pm
 	NEED man/3/${"RdKw::WwW::SiteConf::L10N"}.3

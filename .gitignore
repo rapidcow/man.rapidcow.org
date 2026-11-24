@@ -14,3 +14,7 @@ Makefile
 build.ninja
 .ninja_log
 docs/
+
+# what siteconf -G redo writes, and redo (if no .redo/ above us)
+/all.do
+.redo/

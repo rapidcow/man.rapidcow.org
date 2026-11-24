@@ -2,11 +2,11 @@
 
 read_deps is documented in RdKw::WwW::GenGenLib (GenLib says those
 subroutines moved there), so link to it there.  Still so upstream
-(siteconf master 00ab754).
+(siteconf master 0daaffe).
 
 --- a/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm
 +++ b/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf.pm
-@@ -190,7 +190,7 @@
+@@ -327,7 +327,7 @@
  =item the files themselves
  
  A source file declares its place in the graph in a header (see
