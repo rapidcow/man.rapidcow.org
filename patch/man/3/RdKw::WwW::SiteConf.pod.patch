@@ -1,4 +1,4 @@
-# HAVE: patch/man/3/RdKw..WwW..SiteConf.pod.patch
+# HAVE: patch/man/3/RdKw${U+003A}${U+003A}WwW${U+003A}${U+003A}SiteConf.pod.patch
 
 read_deps is documented in RdKw::WwW::GenGenLib (GenLib says those
 subroutines moved there), so link to it there.  Still so upstream

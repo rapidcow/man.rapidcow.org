@@ -2,7 +2,7 @@
 #
 # view -- serve docs/ at http://localhost:8080/ (or -p PORT), finding
 # PATH as PATH.html or PATH/index.html, as GitHub Pages does: the
-# pages link to each other without .html.  Run ./finish first.
+# pages link to each other without .html.
 #
 port=8080
 dir=docs

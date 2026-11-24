@@ -1,6 +1,6 @@
 #
 # The goals of the build.  Files are relative to ${a} (`.') and are
-# made in ${b} (docs/).  Then ./finish names man/S/A..B back to A::B.
+# made in ${b} (docs/).  A name with `::' is written ${"A::B"}.
 #
 MAKE docs
 	NEED index.html                     # https://man.rapidcow.org/
@@ -22,45 +22,45 @@ MAKE docs
 	NEED man/1/siteconf.html
 	NEED man/1/siteconf.1
 
-	NEED man/3/RdKw..I18N..CodeSets.html
-	NEED man/3/RdKw..I18N..CodeSets.3pm
-	NEED man/3/RdKw..I18N..CodeSets.3
-	NEED man/3/RdKw..I18N..CodeSets..Functions.html
-	NEED man/3/RdKw..I18N..CodeSets..Functions.3pm
-	NEED man/3/RdKw..I18N..CodeSets..Functions.3
-	NEED man/3/RdKw..L10N..TextDomain.html
-	NEED man/3/RdKw..L10N..TextDomain.3pm
-	NEED man/3/RdKw..L10N..TextDomain.3
-	NEED man/3/RdKw..WwW..GenGenLib.html
-	NEED man/3/RdKw..WwW..GenGenLib.3pm
-	NEED man/3/RdKw..WwW..GenGenLib.3
-	NEED man/3/RdKw..WwW..GenGenLib..Manifest.html
-	NEED man/3/RdKw..WwW..GenGenLib..Manifest.3pm
-	NEED man/3/RdKw..WwW..GenGenLib..Manifest.3
-	NEED man/3/RdKw..WwW..GenGenLib..Template..Provider.html
-	NEED man/3/RdKw..WwW..GenGenLib..Template..Provider.3pm
-	NEED man/3/RdKw..WwW..GenGenLib..Template..Provider.3
-	NEED man/3/RdKw..WwW..GenLib.html
-	NEED man/3/RdKw..WwW..GenLib.3pm
-	NEED man/3/RdKw..WwW..GenLib.3
-	NEED man/3/RdKw..WwW..SiteConf.html
-	NEED man/3/RdKw..WwW..SiteConf.3pm
-	NEED man/3/RdKw..WwW..SiteConf.3
-	NEED man/3/RdKw..WwW..SiteConf..Configure.html
-	NEED man/3/RdKw..WwW..SiteConf..Configure.3pm
-	NEED man/3/RdKw..WwW..SiteConf..Configure.3
-	NEED man/3/RdKw..WwW..SiteConf..GMake.html
-	NEED man/3/RdKw..WwW..SiteConf..GMake.3pm
-	NEED man/3/RdKw..WwW..SiteConf..GMake.3
-	NEED man/3/RdKw..WwW..SiteConf..Make.html
-	NEED man/3/RdKw..WwW..SiteConf..Make.3pm
-	NEED man/3/RdKw..WwW..SiteConf..Make.3
-	NEED man/3/RdKw..WwW..SiteConf..Modifiers.html
-	NEED man/3/RdKw..WwW..SiteConf..Modifiers.3pm
-	NEED man/3/RdKw..WwW..SiteConf..Modifiers.3
-	NEED man/3/RdKw..WwW..SiteConf..Ninja.html
-	NEED man/3/RdKw..WwW..SiteConf..Ninja.3pm
-	NEED man/3/RdKw..WwW..SiteConf..Ninja.3
-	NEED man/3/RdKw..WwW..SiteConf..L10N.html
-	NEED man/3/RdKw..WwW..SiteConf..L10N.3pm
-	NEED man/3/RdKw..WwW..SiteConf..L10N.3
+	NEED man/3/${"RdKw::I18N::CodeSets"}.html
+	NEED man/3/${"RdKw::I18N::CodeSets"}.3pm
+	NEED man/3/${"RdKw::I18N::CodeSets"}.3
+	NEED man/3/${"RdKw::I18N::CodeSets::Functions"}.html
+	NEED man/3/${"RdKw::I18N::CodeSets::Functions"}.3pm
+	NEED man/3/${"RdKw::I18N::CodeSets::Functions"}.3
+	NEED man/3/${"RdKw::L10N::TextDomain"}.html
+	NEED man/3/${"RdKw::L10N::TextDomain"}.3pm
+	NEED man/3/${"RdKw::L10N::TextDomain"}.3
+	NEED man/3/${"RdKw::WwW::GenGenLib"}.html
+	NEED man/3/${"RdKw::WwW::GenGenLib"}.3pm
+	NEED man/3/${"RdKw::WwW::GenGenLib"}.3
+	NEED man/3/${"RdKw::WwW::GenGenLib::Manifest"}.html
+	NEED man/3/${"RdKw::WwW::GenGenLib::Manifest"}.3pm
+	NEED man/3/${"RdKw::WwW::GenGenLib::Manifest"}.3
+	NEED man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.html
+	NEED man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.3pm
+	NEED man/3/${"RdKw::WwW::GenGenLib::Template::Provider"}.3
+	NEED man/3/${"RdKw::WwW::GenLib"}.html
+	NEED man/3/${"RdKw::WwW::GenLib"}.3pm
+	NEED man/3/${"RdKw::WwW::GenLib"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Configure"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Configure"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Configure"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::GMake"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::GMake"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::GMake"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Make"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Make"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Make"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Modifiers"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Modifiers"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Modifiers"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::Ninja"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::Ninja"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::Ninja"}.3
+	NEED man/3/${"RdKw::WwW::SiteConf::L10N"}.html
+	NEED man/3/${"RdKw::WwW::SiteConf::L10N"}.3pm
+	NEED man/3/${"RdKw::WwW::SiteConf::L10N"}.3
