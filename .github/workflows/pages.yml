@@ -37,10 +37,10 @@ env:
   SITECONF_URL: https://github.com/rapidcow/siteconf.git
   CODESETS_REF: codesets/v0.00_00
   TEXTDOMAIN_REF: textdomain/v0.00_00
-  GENGENLIB_REF: master
+  GENGENLIB_REF: gengenlib/v0.01_00
   GENLIB_REF: genlib/v0.03_00
   TEMPLATE_PROVIDER_REF: template-provider/v0.00_00
-  SITECONF_REF: master
+  SITECONF_REF: siteconf/v0.03_00
 
 jobs:
   deploy:
