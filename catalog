@@ -23,16 +23,16 @@
 #
 
 #       DIST                              VERSION  TAG
-release I18N-CodeSets                     0.00_00  codesets/v0.00_00  https://github.com/rapidcow/siteconf
-release L10N-TextDomain                   0.00_00  textdomain/v0.00_00
-release WwW-GenGenLib                     0.01_00  gengenlib/v0.01_00
-release WwW-GenGenLib-Template-Provider   0.00_00  template-provider/v0.00_00
-release WwW-GenLib                        0.03_00  genlib/v0.03_00
-release WwW-SiteConf                      0.03_00  siteconf/v0.03_00
-release WwW-SiteConf-L10N                 0.00_00  siteconf-l10n/v0.00_00
-release WwW-SiteConf-Ninja                0.03_00  siteconf-ninja/v0.03_00
-release WwW-SiteConf-Redo                 0.03_00  siteconf-redo/v0.03_00
-release WwW-SiteConf-Doit                 0.03_00  siteconf-doit/v0.03_00
+release I18N-CodeSets                     0.00_00  HEAD  https://github.com/rapidcow/siteconf  # TODO
+release L10N-TextDomain                   0.00_00  HEAD  # TODO
+release WwW-GenGenLib                     0.01_00  HEAD  # TODO
+release WwW-GenGenLib-Template-Provider   0.00_00  HEAD  # TODO
+release WwW-GenLib                        0.03_00  HEAD  # TODO
+release WwW-SiteConf                      0.03_00  HEAD  # TODO
+release WwW-SiteConf-L10N                 0.00_00  HEAD  # TODO
+release WwW-SiteConf-Ninja                0.03_00  HEAD  # TODO
+release WwW-SiteConf-Redo                 0.03_00  HEAD  # TODO
+release WwW-SiteConf-Doit                 0.03_00  HEAD  # TODO
 
 #    SEC NAME                                       DIST                             VERSION  PATH
 page 1   siteconf                                   WwW-SiteConf                     0.03_00  siteconf/script/siteconf
