@@ -9,7 +9,7 @@
 # NEED: src/WwW-GenGenLib-Template-Provider/0.00_00/RELEASE
 # NEED: src/WwW-GenLib/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf/0.03_00/RELEASE
-# NEED: src/WwW-SiteConf-L10N/0.00_00/RELEASE
+# NEED: src/WwW-SiteConf-L10N/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf-Ninja/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf-Redo/0.03_00/RELEASE
 # NEED: src/WwW-SiteConf-Doit/0.03_00/RELEASE

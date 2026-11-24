@@ -61,7 +61,7 @@ ${c}/man/3/${"RdKw::WwW::SiteConf::Backend::Doit"}.pod: ${a}/src/WwW-SiteConf-Do
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
 ${c}/man/3/${"RdKw::WwW::SiteConf::Modifiers"}.pod: ${a}/src/WwW-SiteConf/0.03_00/siteconf/lib/RdKw/WwW/SiteConf/Modifiers.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
-${c}/man/3/${"RdKw::WwW::SiteConf::L10N"}.pod: ${a}/src/WwW-SiteConf-L10N/0.00_00/siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm ${A}/mkman
+${c}/man/3/${"RdKw::WwW::SiteConf::L10N"}.pod: ${a}/src/WwW-SiteConf-L10N/0.03_00/siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm ${A}/mkman
 	cd -- ${A:Q} && ${^X} mkman -B ${B:Q} prep ${@} ${a}/${<}
 
 #

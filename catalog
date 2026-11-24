@@ -23,16 +23,16 @@
 #
 
 #       DIST                              VERSION  TAG
-release I18N-CodeSets                     0.00_00  HEAD  https://github.com/rapidcow/siteconf  # TODO
-release L10N-TextDomain                   0.00_00  HEAD  # TODO
-release WwW-GenGenLib                     0.01_00  HEAD  # TODO
-release WwW-GenGenLib-Template-Provider   0.00_00  HEAD  # TODO
-release WwW-GenLib                        0.03_00  HEAD  # TODO
-release WwW-SiteConf                      0.03_00  HEAD  # TODO
-release WwW-SiteConf-L10N                 0.00_00  HEAD  # TODO
-release WwW-SiteConf-Ninja                0.03_00  HEAD  # TODO
-release WwW-SiteConf-Redo                 0.03_00  HEAD  # TODO
-release WwW-SiteConf-Doit                 0.03_00  HEAD  # TODO
+release I18N-CodeSets                     0.00_00  codesets/v0.00_00           https://github.com/rapidcow/siteconf
+release L10N-TextDomain                   0.00_00  textdomain/v0.00_00
+release WwW-GenGenLib                     0.01_00  gengenlib/v0.01_00
+release WwW-GenGenLib-Template-Provider   0.00_00  template-provider/v0.00_00
+release WwW-GenLib                        0.03_00  genlib/v0.03_00
+release WwW-SiteConf                      0.03_00  siteconf/v0.03_00
+release WwW-SiteConf-L10N                 0.03_00  siteconf-l10n/v0.03_00
+release WwW-SiteConf-Ninja                0.03_00  siteconf-ninja/v0.03_00
+release WwW-SiteConf-Redo                 0.03_00  siteconf-redo/v0.03_00
+release WwW-SiteConf-Doit                 0.03_00  siteconf-doit/v0.03_00
 
 #    SEC NAME                                       DIST                             VERSION  PATH
 page 1   siteconf                                   WwW-SiteConf                     0.03_00  siteconf/script/siteconf
@@ -49,7 +49,7 @@ page 3pm RdKw::WwW::SiteConf::Backend::Bmake        WwW-SiteConf                
 page 3pm RdKw::WwW::SiteConf::Backend::Gmake        WwW-SiteConf                     0.03_00  siteconf/lib/RdKw/WwW/SiteConf/Backend/Gmake.pm
 page 3pm RdKw::WwW::SiteConf::Backend::Make         WwW-SiteConf                     0.03_00  siteconf/lib/RdKw/WwW/SiteConf/Backend/Make.pm
 page 3pm RdKw::WwW::SiteConf::Modifiers             WwW-SiteConf                     0.03_00  siteconf/lib/RdKw/WwW/SiteConf/Modifiers.pm
-page 3pm RdKw::WwW::SiteConf::L10N                  WwW-SiteConf-L10N                0.00_00  siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm
+page 3pm RdKw::WwW::SiteConf::L10N                  WwW-SiteConf-L10N                0.03_00  siteconf-l10n/lib/RdKw/WwW/SiteConf/L10N.pm
 page 3pm RdKw::WwW::SiteConf::Backend::Ninja        WwW-SiteConf-Ninja               0.03_00  siteconf-ninja/lib/RdKw/WwW/SiteConf/Backend/Ninja.pm
 page 3pm RdKw::WwW::SiteConf::Backend::Redo         WwW-SiteConf-Redo                0.03_00  siteconf-redo/lib/RdKw/WwW/SiteConf/Backend/Redo.pm
 page 3pm RdKw::WwW::SiteConf::Backend::Doit         WwW-SiteConf-Doit                0.03_00  siteconf-doit/lib/RdKw/WwW/SiteConf/Backend/Doit.pm
